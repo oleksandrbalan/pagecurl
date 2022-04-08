@@ -2,8 +2,10 @@ package eu.wewox.pagecurl.utils
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
+import kotlin.math.cos
+import kotlin.math.sin
 
-data class Polygon(val vertices: List<Offset>) {
+internal data class Polygon(val vertices: List<Offset>) {
 
     private val size: Int = vertices.size
 
@@ -44,6 +46,12 @@ data class Polygon(val vertices: List<Offset>) {
 private fun Offset.normalized(): Offset {
     val distance = getDistance()
     return if (distance != 0f) this / distance else this
+}
+
+internal fun Offset.rotate(angle: Float): Offset {
+    val sin = sin(angle)
+    val cos = cos(angle)
+    return Offset(x * cos - y * sin, x * sin + y * cos)
 }
 
 internal fun lineLineIntersection(

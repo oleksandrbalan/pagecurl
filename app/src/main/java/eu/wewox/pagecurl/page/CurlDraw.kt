@@ -2,6 +2,7 @@ package eu.wewox.pagecurl.page
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.os.Build
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.CacheDrawScope
 import androidx.compose.ui.draw.drawWithCache
@@ -18,21 +19,28 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import eu.wewox.pagecurl.utils.Polygon
 import eu.wewox.pagecurl.utils.lineLineIntersection
+import eu.wewox.pagecurl.utils.rotate
 import java.lang.Float.max
 import kotlin.math.atan2
 
 data class CurlConfig(
+    val backPage: BackPageConfig = BackPageConfig(),
     val shadow: ShadowConfig = ShadowConfig()
 ) {
+    data class BackPageConfig(
+        val color: Color = Color.White,
+        val contentAlpha: Float = 0.1f,
+    )
+
     data class ShadowConfig(
         val color: Color = Color.Black,
         val alpha: Float = 0.2f,
-        val radius: Dp = 40.dp,
-        val offsetX: Dp = 0.dp,
-        val offsetY: Dp = 0.dp,
+        val radius: Dp = 15.dp,
+        val offset: DpOffset = DpOffset((-5).dp, 0.dp),
     )
 }
 
@@ -65,14 +73,12 @@ fun Modifier.drawCurl(
     val topCurlOffset = Offset(max(0f, topIntersection.x), topIntersection.y)
     val bottomCurlOffset = Offset(max(0f, bottomIntersection.x), bottomIntersection.y)
 
-    val clippedContent = prepareClippedContent(topCurlOffset, bottomCurlOffset)
-    val shadowBelowCurl = prepareShadowBelowCurl(config.shadow, topCurlOffset, bottomCurlOffset)
-    val curl = prepareCurl(topCurlOffset, bottomCurlOffset)
+    val drawClippedContent = prepareClippedContent(topCurlOffset, bottomCurlOffset)
+    val drawCurl = prepareCurl(config, topCurlOffset, bottomCurlOffset)
 
     onDrawWithContent {
-        clippedContent()
-        shadowBelowCurl()
-        curl()
+        drawClippedContent()
+        drawCurl()
     }
 }
 
@@ -91,96 +97,129 @@ private fun CacheDrawScope.prepareClippedContent(
     }
 }
 
-private fun CacheDrawScope.prepareShadowBelowCurl(
-    shadow: CurlConfig.ShadowConfig,
+private fun CacheDrawScope.prepareCurl(
+    config: CurlConfig,
     topCurlOffset: Offset,
     bottomCurlOffset: Offset,
 ): ContentDrawScope.() -> Unit {
-    val shadowColor = shadow.color.copy(alpha = shadow.alpha).toArgb()
-    val transparent = shadow.color.copy(alpha = 0f).toArgb()
-
-    val paint = Paint()
-    val frameworkPaint = paint.asFrameworkPaint()
-    frameworkPaint.color = transparent
-
-    val radius = shadow.radius.toPx()
-    frameworkPaint.setShadowLayer(
-        shadow.radius.toPx(),
-        shadow.offsetX.toPx(),
-        shadow.offsetY.toPx(),
-        shadowColor
-    )
-
-    val bitmap = Bitmap.createBitmap((size.width + radius * 4).toInt(), (size.height + radius * 4).toInt(), Bitmap.Config.ARGB_8888)
-    bitmap.eraseColor(Color.Transparent.toArgb())
-    val canvas = Canvas(bitmap)
-
-    val path = Polygon(
+    val polygon = Polygon(
         sequence {
+            suspend fun SequenceScope<Offset>.yieldEndSideInterception() {
+                val offset = lineLineIntersection(
+                    topCurlOffset, bottomCurlOffset,
+                    Offset(size.width, 0f), Offset(size.width, size.height)
+                ) ?: return
+                yield(offset)
+                yield(offset)
+            }
             if (topCurlOffset.x < size.width) {
                 yield(topCurlOffset)
                 yield(Offset(size.width, topCurlOffset.y))
             } else {
-                val a = lineLineIntersection(topCurlOffset, bottomCurlOffset, Offset(size.width, 0f), Offset(size.width, size.height))!!
-                yield(a)
-                yield(a)
+                yieldEndSideInterception()
             }
             if (bottomCurlOffset.x < size.width) {
                 yield(Offset(size.width, size.height))
                 yield(bottomCurlOffset)
             } else {
-                val a = lineLineIntersection(topCurlOffset, bottomCurlOffset, Offset(size.width, 0f), Offset(size.width, size.height))!!
-                yield(a)
-                yield(a)
+                yieldEndSideInterception()
             }
         }.toList()
-    ).translate(
-        Offset(2 * radius, 2 * radius)
-    ).offset(
-        radius
-    ).toPath()
+    )
 
-    canvas.drawPath(path.asAndroidPath(), frameworkPaint)
+    val lineVector = topCurlOffset - bottomCurlOffset
+    val angle = Math.PI.toFloat() + atan2(-lineVector.y, lineVector.x) * 2
+    val drawShadow = prepareShadow(config, polygon, angle)
 
-    return {
-        val lineVector = topCurlOffset - bottomCurlOffset
-        val angle = atan2(-lineVector.y, lineVector.x)
-
+    return result@{
         withTransform({
             scale(-1f, 1f, pivot = bottomCurlOffset)
-
-            rotateRad(Math.PI.toFloat() + 2 * angle, pivot = bottomCurlOffset)
+            rotateRad(angle, pivot = bottomCurlOffset)
         }) {
-            drawIntoCanvas {
-                it.nativeCanvas.drawBitmap(bitmap, -2 * radius, -2 * radius, null)
+            this@result.drawShadow()
+
+            clipPath(polygon.toPath()) {
+                this@result.drawContent()
+
+                val overlayAlpha = 1f - config.backPage.contentAlpha
+                drawRect(config.backPage.color.copy(alpha = overlayAlpha))
             }
         }
     }
 }
 
-private fun CacheDrawScope.prepareCurl(
-    topCurlOffset: Offset,
-    bottomCurlOffset: Offset,
+private fun CacheDrawScope.prepareShadow(
+    config: CurlConfig,
+    polygon: Polygon,
+    angle: Float
 ): ContentDrawScope.() -> Unit {
-    val lineVector = topCurlOffset - bottomCurlOffset
-    val angle = atan2(-lineVector.y, lineVector.x)
+    val shadow = config.shadow
 
-    val path = Path()
-    path.moveTo(topCurlOffset.x, topCurlOffset.y)
-    path.lineTo(max(size.width, topCurlOffset.x), topCurlOffset.y)
-    path.lineTo(max(size.width, bottomCurlOffset.x), bottomCurlOffset.y)
-    path.lineTo(bottomCurlOffset.x, bottomCurlOffset.y)
+    if (shadow.alpha == 0f || shadow.radius == 0.dp) {
+        return { /* No shadow is requested */ }
+    }
 
-    return result@{
-        withTransform({
-            scale(-1f, 1f, pivot = bottomCurlOffset)
+    val radius = shadow.radius.toPx()
+    val shadowColor = shadow.color.copy(alpha = shadow.alpha).toArgb()
+    val transparent = shadow.color.copy(alpha = 0f).toArgb()
+    val shadowOffset = Offset(-shadow.offset.x.toPx(), shadow.offset.y.toPx())
+        .rotate(2 * Math.PI.toFloat() - angle)
+    val paint = Paint().apply {
+        val frameworkPaint = asFrameworkPaint()
+        frameworkPaint.color = transparent
+        frameworkPaint.setShadowLayer(
+            shadow.radius.toPx(),
+            shadowOffset.x,
+            shadowOffset.y,
+            shadowColor
+        )
+    }
 
-            rotateRad(Math.PI.toFloat() + 2 * angle, pivot = bottomCurlOffset)
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        prepareShadowApi28(radius, paint, polygon)
+    } else {
+        prepareShadowImage(radius, paint, polygon)
+    }
+}
 
-            clipPath(path)
-        }) {
-            this@result.drawContent()
-            drawRect(Color.White.copy(alpha = 0.8f))
+private fun prepareShadowApi28(
+    radius: Float,
+    paint: Paint,
+    polygon: Polygon,
+): ContentDrawScope.() -> Unit = {
+    drawIntoCanvas {
+        it.nativeCanvas.drawPath(
+            polygon
+                .offset(radius).toPath()
+                .asAndroidPath(),
+            paint.asFrameworkPaint()
+        )
+    }
+}
+
+private fun CacheDrawScope.prepareShadowImage(
+    radius: Float,
+    paint: Paint,
+    polygon: Polygon,
+): ContentDrawScope.() -> Unit {
+    val bitmap = Bitmap.createBitmap(
+        (size.width + radius * 4).toInt(),
+        (size.height + radius * 4).toInt(),
+        Bitmap.Config.ARGB_8888
+    )
+    Canvas(bitmap).apply {
+        drawPath(
+            polygon
+                .translate(Offset(2 * radius, 2 * radius))
+                .offset(radius).toPath()
+                .asAndroidPath(),
+            paint.asFrameworkPaint()
+        )
+    }
+
+    return {
+        drawIntoCanvas {
+            it.nativeCanvas.drawBitmap(bitmap, -2 * radius, -2 * radius, null)
         }
     }
 }
