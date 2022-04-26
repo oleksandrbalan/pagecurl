@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.CacheDrawScope
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidPath
@@ -18,43 +18,29 @@ import androidx.compose.ui.graphics.drawscope.rotateRad
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import eu.wewox.pagecurl.config.CurlConfig
 import eu.wewox.pagecurl.utils.Polygon
 import eu.wewox.pagecurl.utils.lineLineIntersection
 import eu.wewox.pagecurl.utils.rotate
 import java.lang.Float.max
 import kotlin.math.atan2
 
-data class CurlConfig(
-    val backPage: BackPageConfig = BackPageConfig(),
-    val shadow: ShadowConfig = ShadowConfig()
-) {
-    data class BackPageConfig(
-        val color: Color = Color.White,
-        val contentAlpha: Float = 0.1f,
-    )
-
-    data class ShadowConfig(
-        val color: Color = Color.Black,
-        val alpha: Float = 0.2f,
-        val radius: Dp = 15.dp,
-        val offset: DpOffset = DpOffset((-5).dp, 0.dp),
-    )
-}
-
 fun Modifier.drawCurl(
     config: CurlConfig = CurlConfig(),
-    posA: Offset?,
-    posB: Offset?,
+    posA: Offset,
+    posB: Offset,
 ): Modifier = drawWithCache {
     fun drawOnlyContent() =
         onDrawWithContent {
             drawContent()
         }
 
-    if (posA == null || posB == null) {
+    if (posA == size.toRect().topLeft && posB == size.toRect().bottomLeft) {
+        return@drawWithCache onDrawWithContent { }
+    }
+
+    if (posA == size.toRect().topRight && posB == size.toRect().bottomRight) {
         return@drawWithCache drawOnlyContent()
     }
 
