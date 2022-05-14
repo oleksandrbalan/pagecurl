@@ -28,7 +28,7 @@ import java.lang.Float.max
 import kotlin.math.atan2
 
 @ExperimentalPageCurlApi
-public fun Modifier.drawCurl(
+internal fun Modifier.drawCurl(
     config: CurlConfig = CurlConfig(),
     posA: Offset,
     posB: Offset,

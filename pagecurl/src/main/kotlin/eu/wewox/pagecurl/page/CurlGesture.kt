@@ -18,7 +18,7 @@ import eu.wewox.pagecurl.utils.rotate
 import kotlin.math.PI
 
 @ExperimentalPageCurlApi
-public fun Modifier.curlGesture(
+internal fun Modifier.curlGesture(
     enabled: Boolean,
     direction: CurlDirection,
     onStart: () -> Unit,
