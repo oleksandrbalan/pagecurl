@@ -13,4 +13,5 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "PageCurl"
-include ':app'
+include ':demo'
+include ':pagecurl'

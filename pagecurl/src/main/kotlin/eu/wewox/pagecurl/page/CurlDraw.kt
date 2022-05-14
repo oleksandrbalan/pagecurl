@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.config.CurlConfig
 import eu.wewox.pagecurl.utils.Polygon
 import eu.wewox.pagecurl.utils.lineLineIntersection
@@ -26,7 +27,8 @@ import eu.wewox.pagecurl.utils.rotate
 import java.lang.Float.max
 import kotlin.math.atan2
 
-fun Modifier.drawCurl(
+@ExperimentalPageCurlApi
+public fun Modifier.drawCurl(
     config: CurlConfig = CurlConfig(),
     posA: Offset,
     posB: Offset,
@@ -68,6 +70,7 @@ fun Modifier.drawCurl(
     }
 }
 
+@ExperimentalPageCurlApi
 private fun CacheDrawScope.prepareClippedContent(
     topCurlOffset: Offset,
     bottomCurlOffset: Offset,
@@ -83,6 +86,7 @@ private fun CacheDrawScope.prepareClippedContent(
     }
 }
 
+@ExperimentalPageCurlApi
 private fun CacheDrawScope.prepareCurl(
     config: CurlConfig,
     topCurlOffset: Offset,
@@ -134,6 +138,7 @@ private fun CacheDrawScope.prepareCurl(
     }
 }
 
+@ExperimentalPageCurlApi
 private fun CacheDrawScope.prepareShadow(
     config: CurlConfig,
     polygon: Polygon,

@@ -12,11 +12,13 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.IntSize
+import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.config.CurlDirection
 import eu.wewox.pagecurl.utils.rotate
 import kotlin.math.PI
 
-fun Modifier.curlGesture(
+@ExperimentalPageCurlApi
+public fun Modifier.curlGesture(
     enabled: Boolean,
     direction: CurlDirection,
     onStart: () -> Unit,

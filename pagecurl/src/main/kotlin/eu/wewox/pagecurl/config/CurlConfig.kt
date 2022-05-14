@@ -6,13 +6,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import eu.wewox.pagecurl.ExperimentalPageCurlApi
 
-data class PageCurlConfig(
+@ExperimentalPageCurlApi
+public data class PageCurlConfig(
     val curl: CurlConfig = CurlConfig(),
     val interaction: InteractionConfig = InteractionConfig()
 )
 
-data class InteractionConfig(
+@ExperimentalPageCurlApi
+public data class InteractionConfig(
     val forward: CurlDirection.Forward = CurlDirection.Forward(
         Rect(Offset(0.5f, 0.0f), Offset(1.0f, 1.0f)),
         Rect(Offset(0.0f, 0.0f), Offset(0.5f, 1.0f)),
@@ -20,25 +23,29 @@ data class InteractionConfig(
     val backward: CurlDirection.Backward = CurlDirection.Backward(forward.end, forward.start),
 )
 
-sealed interface CurlDirection {
-    val start: Rect
-    val end: Rect
+@ExperimentalPageCurlApi
+public sealed interface CurlDirection {
+    public val start: Rect
+    public val end: Rect
 
-    data class Forward(override val start: Rect, override val end: Rect) : CurlDirection
-    data class Backward(override val start: Rect, override val end: Rect) : CurlDirection
+    public data class Forward(override val start: Rect, override val end: Rect) : CurlDirection
+    public data class Backward(override val start: Rect, override val end: Rect) : CurlDirection
 }
 
-data class CurlConfig(
+@ExperimentalPageCurlApi
+public data class CurlConfig(
     val backPage: BackPageConfig = BackPageConfig(),
     val shadow: ShadowConfig = ShadowConfig(),
 )
 
-data class BackPageConfig(
+@ExperimentalPageCurlApi
+public data class BackPageConfig(
     val color: Color = Color.White,
     val contentAlpha: Float = 0.1f,
 )
 
-data class ShadowConfig(
+@ExperimentalPageCurlApi
+public data class ShadowConfig(
     val color: Color = Color.Black,
     val alpha: Float = 0.2f,
     val radius: Dp = 15.dp,

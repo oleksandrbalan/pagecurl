@@ -13,13 +13,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.config.CurlDirection
 import eu.wewox.pagecurl.config.PageCurlConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@ExperimentalPageCurlApi
 @Composable
-fun PageCurl(
+public fun PageCurl(
     current: Int,
     count: Int,
     modifier: Modifier = Modifier,
@@ -79,6 +81,7 @@ fun PageCurl(
     }
 }
 
+@ExperimentalPageCurlApi
 private fun Modifier.curlGesture(
     enabled: Boolean,
     scope: CoroutineScope,
