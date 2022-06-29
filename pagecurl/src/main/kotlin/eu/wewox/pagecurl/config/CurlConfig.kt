@@ -16,21 +16,18 @@ public data class PageCurlConfig(
 
 @ExperimentalPageCurlApi
 public data class InteractionConfig(
-    val forward: CurlDirection.Forward = CurlDirection.Forward(
+    val forward: CurlDirection = CurlDirection(
         Rect(Offset(0.5f, 0.0f), Offset(1.0f, 1.0f)),
         Rect(Offset(0.0f, 0.0f), Offset(0.5f, 1.0f)),
     ),
-    val backward: CurlDirection.Backward = CurlDirection.Backward(forward.end, forward.start),
+    val backward: CurlDirection = CurlDirection(forward.end, forward.start),
 )
 
 @ExperimentalPageCurlApi
-public sealed interface CurlDirection {
-    public val start: Rect
-    public val end: Rect
-
-    public data class Forward(override val start: Rect, override val end: Rect) : CurlDirection
-    public data class Backward(override val start: Rect, override val end: Rect) : CurlDirection
-}
+public data class CurlDirection(
+    val start: Rect,
+    val end: Rect
+)
 
 @ExperimentalPageCurlApi
 public data class CurlConfig(

@@ -19,13 +19,14 @@ import kotlin.math.PI
 
 @ExperimentalPageCurlApi
 internal fun Modifier.curlGesture(
+    key: Any?,
     enabled: Boolean,
     direction: CurlDirection,
     onStart: () -> Unit,
     onCurl: (Offset, Offset) -> Unit,
     onEnd: () -> Unit,
     onCancel: () -> Unit,
-): Modifier = pointerInput(enabled) {
+): Modifier = pointerInput(enabled, key) {
     if (!enabled) {
         return@pointerInput
     }
@@ -51,6 +52,11 @@ internal fun Modifier.curlGesture(
                 change.consume()
                 val vector = (dragStart - dragCurrent).rotate(PI.toFloat() / 2)
                 onCurl(dragCurrent - vector, dragCurrent + vector)
+            }
+
+            if (dragCurrent == dragStart) {
+                onCancel()
+                return@awaitPointerEventScope
             }
 
             val velocity = velocityTracker.calculateVelocity()
