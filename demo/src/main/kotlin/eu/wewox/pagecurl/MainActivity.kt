@@ -8,12 +8,15 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.wewox.pagecurl.components.SettingsPopup
+import eu.wewox.pagecurl.components.overlayControls
 import eu.wewox.pagecurl.config.PageCurlConfig
 import eu.wewox.pagecurl.page.PageCurl
 import eu.wewox.pagecurl.page.rememberPageCurlState
@@ -33,13 +37,31 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             PageCurlTheme {
-                Column {
+                Box {
                     val scope = rememberCoroutineScope()
                     val state = rememberPageCurlState(max = 6)
+                    var showPopup by remember { mutableStateOf(false) }
 
                     PageCurl(
                         state = state,
                         config = PageCurlConfig(),
+                        modifier = Modifier.overlayControls(
+                            next = {
+                                scope.launch {
+                                    val next = (state.current + 1).coerceAtMost(state.max - 1)
+                                    state.snapTo(next)
+                                }
+                            },
+                            prev = {
+                                scope.launch {
+                                    val prev = (state.current - 1).coerceAtLeast(0)
+                                    state.snapTo(prev)
+                                }
+                            },
+                            center = {
+                                showPopup = true
+                            }
+                        )
                     ) { index ->
                         Box(
                             modifier = Modifier
@@ -71,21 +93,27 @@ class MainActivity : ComponentActivity() {
                                     .background(Color.Black, RoundedCornerShape(topStartPercent = 100))
                                     .padding(16.dp)
                             )
-
-                            SettingsPopup(
-                                onSnapToFirst = {
-                                    scope.launch {
-                                        state.snapTo(0)
-                                    }
-                                },
-                                onSnapToLast = {
-                                    scope.launch {
-                                        state.snapTo(state.max - 1)
-                                    }
-                                },
-                                modifier = Modifier.align(Alignment.Center)
-                            )
                         }
+                    }
+
+                    if (showPopup) {
+                        SettingsPopup(
+                            onSnapToFirst = {
+                                scope.launch {
+                                    state.snapTo(0)
+                                    showPopup = false
+                                }
+                            },
+                            onSnapToLast = {
+                                scope.launch {
+                                    state.snapTo(state.max - 1)
+                                    showPopup = false
+                                }
+                            },
+                            onDismiss = {
+                                showPopup = false
+                            }
+                        )
                     }
                 }
             }
