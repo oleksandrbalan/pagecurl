@@ -11,22 +11,20 @@ import eu.wewox.pagecurl.ExperimentalPageCurlApi
 @ExperimentalPageCurlApi
 public data class PageCurlConfig(
     val curl: CurlConfig = CurlConfig(),
-    val interaction: InteractionConfig = InteractionConfig()
+    val direction: PageCurlDirection = PageCurlDirection.StartToEnd,
+    val interaction: InteractionConfig = InteractionConfig(forward = direction.forward()),
 )
 
 @ExperimentalPageCurlApi
 public data class InteractionConfig(
-    val forward: CurlDirection = CurlDirection(
-        Rect(Offset(0.5f, 0.0f), Offset(1.0f, 1.0f)),
-        Rect(Offset(0.0f, 0.0f), Offset(0.5f, 1.0f)),
-    ),
-    val backward: CurlDirection = CurlDirection(forward.end, forward.start),
+    val forward: DragDirection,
+    val backward: DragDirection = DragDirection(forward.end, forward.start),
 )
 
 @ExperimentalPageCurlApi
-public data class CurlDirection(
+public data class DragDirection(
     val start: Rect,
-    val end: Rect
+    val end: Rect,
 )
 
 @ExperimentalPageCurlApi
@@ -48,3 +46,20 @@ public data class ShadowConfig(
     val radius: Dp = 15.dp,
     val offset: DpOffset = DpOffset((-5).dp, 0.dp),
 )
+
+@ExperimentalPageCurlApi
+public enum class PageCurlDirection {
+    StartToEnd,
+    // TODO (Alex) Add support for reversed end-to-start direction
+    //  EndToStart,
+}
+
+private fun left(): Rect = Rect(Offset(0.0f, 0.0f), Offset(0.5f, 1.0f))
+
+private fun right(): Rect = Rect(Offset(0.5f, 0.0f), Offset(1.0f, 1.0f))
+
+@ExperimentalPageCurlApi
+private fun PageCurlDirection.forward(): DragDirection =
+    when (this) {
+        PageCurlDirection.StartToEnd -> DragDirection(right(), left())
+    }

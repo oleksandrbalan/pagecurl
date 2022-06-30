@@ -1,5 +1,7 @@
 package eu.wewox.pagecurl.page
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector4D
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.calculateTargetValue
 import androidx.compose.animation.splineBasedDecay
@@ -13,15 +15,60 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.unit.IntSize
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
-import eu.wewox.pagecurl.config.CurlDirection
+import eu.wewox.pagecurl.config.DragDirection
 import eu.wewox.pagecurl.utils.rotate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlin.math.PI
+
+@ExperimentalPageCurlApi
+internal fun Modifier.curlGesture(
+    state: PageCurlState.InternalState,
+    enabled: Boolean,
+    scope: CoroutineScope,
+    direction: DragDirection,
+    start: Edge,
+    end: Edge,
+    edge: Animatable<Edge, AnimationVector4D>,
+    onChange: () -> Unit,
+): Modifier =
+    curlGesture(
+        key = state,
+        enabled = enabled,
+        direction = direction,
+        onStart = {
+            scope.launch {
+                state.animateJob?.cancel()
+                edge.snapTo(start)
+            }
+        },
+        onCurl = { a, b ->
+            scope.launch {
+                edge.animateTo(Edge(a, b))
+            }
+        },
+        onEnd = {
+            scope.launch {
+                try {
+                    edge.animateTo(end)
+                } finally {
+                    onChange()
+                    edge.snapTo(start)
+                }
+            }
+        },
+        onCancel = {
+            scope.launch {
+                edge.animateTo(start)
+            }
+        },
+    )
 
 @ExperimentalPageCurlApi
 internal fun Modifier.curlGesture(
     key: Any?,
     enabled: Boolean,
-    direction: CurlDirection,
+    direction: DragDirection,
     onStart: () -> Unit,
     onCurl: (Offset, Offset) -> Unit,
     onEnd: () -> Unit,

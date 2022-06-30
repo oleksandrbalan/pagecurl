@@ -48,14 +48,12 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.overlayControls(
                             next = {
                                 scope.launch {
-                                    val next = (state.current + 1).coerceAtMost(state.max - 1)
-                                    state.snapTo(next)
+                                    state.next()
                                 }
                             },
                             prev = {
                                 scope.launch {
-                                    val prev = (state.current - 1).coerceAtLeast(0)
-                                    state.snapTo(prev)
+                                    state.prev()
                                 }
                             },
                             center = {
