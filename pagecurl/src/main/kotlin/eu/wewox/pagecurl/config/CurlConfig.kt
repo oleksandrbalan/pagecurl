@@ -3,28 +3,17 @@ package eu.wewox.pagecurl.config
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
 
 @ExperimentalPageCurlApi
 public data class PageCurlConfig(
     val curl: CurlConfig = CurlConfig(),
-    val direction: PageCurlDirection = PageCurlDirection.StartToEnd,
-    val interaction: InteractionConfig = InteractionConfig(forward = direction.forward()),
-)
-
-@ExperimentalPageCurlApi
-public data class InteractionConfig(
-    val forward: DragDirection,
-    val backward: DragDirection = DragDirection(forward.end, forward.start),
-)
-
-@ExperimentalPageCurlApi
-public data class DragDirection(
-    val start: Rect,
-    val end: Rect,
+    val interaction: InteractionConfig = InteractionConfig(),
 )
 
 @ExperimentalPageCurlApi
@@ -48,18 +37,60 @@ public data class ShadowConfig(
 )
 
 @ExperimentalPageCurlApi
-public enum class PageCurlDirection {
-    StartToEnd,
-    // TODO (Alex) Add support for reversed end-to-start direction
-    //  EndToStart,
+public data class InteractionConfig(
+    val drag: Drag = Drag(),
+    val tap: Tap = Tap(),
+) {
+    @ExperimentalPageCurlApi
+    public data class Drag(
+        val forward: Interaction = Interaction(true, rightHalf(), leftHalf()),
+        val backward: Interaction = Interaction(true, forward.end, forward.start),
+    ) {
+        @ExperimentalPageCurlApi
+        public data class Interaction(
+            val enabled: Boolean,
+            val start: Rect = Rect.Zero,
+            val end: Rect = Rect.Zero,
+        )
+    }
+
+    @ExperimentalPageCurlApi
+    public data class Tap(
+        val forward: Interaction = Interaction(true, rightHalf()),
+        val backward: Interaction = Interaction(true, leftHalf()),
+        val custom: CustomInteraction = CustomInteraction(false)
+    ) {
+        @ExperimentalPageCurlApi
+        public data class Interaction(
+            val enabled: Boolean,
+            val target: Rect = Rect.Zero,
+        )
+
+        @ExperimentalPageCurlApi
+        public data class CustomInteraction(
+            val enabled: Boolean,
+            val onTap: Density.(IntSize, Offset) -> Boolean = { _, _ -> false },
+        )
+    }
 }
 
-private fun left(): Rect = Rect(Offset(0.0f, 0.0f), Offset(0.5f, 1.0f))
-
-private fun right(): Rect = Rect(Offset(0.5f, 0.0f), Offset(1.0f, 1.0f))
-
 @ExperimentalPageCurlApi
-private fun PageCurlDirection.forward(): DragDirection =
-    when (this) {
-        PageCurlDirection.StartToEnd -> DragDirection(right(), left())
-    }
+public fun InteractionConfig.copy(
+    dragForwardEnabled: Boolean = drag.forward.enabled,
+    dragBackwardEnabled: Boolean = drag.backward.enabled,
+    tapForwardEnabled: Boolean = tap.forward.enabled,
+    tapBackwardEnabled: Boolean = tap.backward.enabled,
+): InteractionConfig = copy(
+    drag = drag.copy(
+        forward = drag.forward.copy(enabled = dragForwardEnabled),
+        backward = drag.backward.copy(enabled = dragBackwardEnabled)
+    ),
+    tap = tap.copy(
+        forward = tap.forward.copy(enabled = tapForwardEnabled),
+        backward = tap.backward.copy(enabled = tapBackwardEnabled)
+    )
+)
+
+private fun leftHalf(): Rect = Rect(0.0f, 0.0f, 0.5f, 1.0f)
+
+private fun rightHalf(): Rect = Rect(0.5f, 0.0f, 1.0f, 1.0f)

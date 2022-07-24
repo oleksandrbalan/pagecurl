@@ -10,12 +10,11 @@ import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
-import androidx.compose.ui.unit.IntSize
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
-import eu.wewox.pagecurl.config.DragDirection
+import eu.wewox.pagecurl.config.InteractionConfig
+import eu.wewox.pagecurl.utils.multiply
 import eu.wewox.pagecurl.utils.rotate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -26,7 +25,7 @@ internal fun Modifier.curlGesture(
     state: PageCurlState.InternalState,
     enabled: Boolean,
     scope: CoroutineScope,
-    direction: DragDirection,
+    direction: InteractionConfig.Drag.Interaction,
     start: Edge,
     end: Edge,
     edge: Animatable<Edge, AnimationVector4D>,
@@ -68,7 +67,7 @@ internal fun Modifier.curlGesture(
 internal fun Modifier.curlGesture(
     key: Any?,
     enabled: Boolean,
-    direction: DragDirection,
+    direction: InteractionConfig.Drag.Interaction,
     onStart: () -> Unit,
     onCurl: (Offset, Offset) -> Unit,
     onEnd: () -> Unit,
@@ -127,9 +126,3 @@ internal fun Modifier.curlGesture(
         }
     }
 }
-
-private fun Rect.multiply(size: IntSize): Rect =
-    Rect(
-        topLeft = Offset(size.width * left, size.height * top),
-        bottomRight = Offset(size.width * right, size.height * bottom),
-    )

@@ -30,9 +30,9 @@ public fun PageCurl(
             Modifier
                 .curlGesture(
                     state = internalState,
-                    enabled = updatedCurrent < state.max - 1,
+                    enabled = config.interaction.drag.forward.enabled && updatedCurrent < state.max - 1,
                     scope = scope,
-                    direction = config.interaction.forward,
+                    direction = config.interaction.drag.forward,
                     start = internalState.rightEdge,
                     end = internalState.leftEdge,
                     edge = internalState.forward,
@@ -40,13 +40,20 @@ public fun PageCurl(
                 )
                 .curlGesture(
                     state = internalState,
-                    enabled = updatedCurrent > 0,
+                    enabled = config.interaction.drag.backward.enabled && updatedCurrent > 0,
                     scope = scope,
-                    direction = config.interaction.backward,
+                    direction = config.interaction.drag.backward,
                     start = internalState.leftEdge,
                     end = internalState.rightEdge,
                     edge = internalState.backward,
                     onChange = { state.current = updatedCurrent - 1 }
+                )
+                .tapGesture(
+                    state = internalState,
+                    scope = scope,
+                    interaction = config.interaction.tap,
+                    onTapForward = state::next,
+                    onTapBackward = state::prev,
                 )
         ) {
             if (updatedCurrent + 1 < state.max) {

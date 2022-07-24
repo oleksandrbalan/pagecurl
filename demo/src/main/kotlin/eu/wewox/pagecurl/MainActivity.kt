@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,12 +23,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toOffset
+import eu.wewox.pagecurl.components.SettingsAction
 import eu.wewox.pagecurl.components.SettingsPopup
-import eu.wewox.pagecurl.components.overlayControls
+import eu.wewox.pagecurl.config.InteractionConfig
 import eu.wewox.pagecurl.config.PageCurlConfig
+import eu.wewox.pagecurl.config.copy
 import eu.wewox.pagecurl.page.PageCurl
+import eu.wewox.pagecurl.page.PageCurlState
 import eu.wewox.pagecurl.page.rememberPageCurlState
 import eu.wewox.pagecurl.ui.theme.PageCurlTheme
 import kotlinx.coroutines.launch
@@ -38,28 +44,28 @@ class MainActivity : ComponentActivity() {
         setContent {
             PageCurlTheme {
                 Box {
-                    val scope = rememberCoroutineScope()
                     val state = rememberPageCurlState(max = 6)
                     var showPopup by remember { mutableStateOf(false) }
+                    var interaction by remember {
+                        mutableStateOf(
+                            InteractionConfig(
+                                tap = InteractionConfig.Tap(
+                                    custom = InteractionConfig.Tap.CustomInteraction(true) { size, position ->
+                                        if ((position - size.center.toOffset()).getDistance() < 64.dp.toPx()) {
+                                            showPopup = true
+                                            true
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                )
+                            )
+                        )
+                    }
 
                     PageCurl(
                         state = state,
-                        config = PageCurlConfig(),
-                        modifier = Modifier.overlayControls(
-                            next = {
-                                scope.launch {
-                                    state.next()
-                                }
-                            },
-                            prev = {
-                                scope.launch {
-                                    state.prev()
-                                }
-                            },
-                            center = {
-                                showPopup = true
-                            }
-                        )
+                        config = PageCurlConfig(interaction = interaction)
                     ) { index ->
                         Box(
                             modifier = Modifier
@@ -96,17 +102,10 @@ class MainActivity : ComponentActivity() {
 
                     if (showPopup) {
                         SettingsPopup(
-                            onSnapToFirst = {
-                                scope.launch {
-                                    state.snapTo(0)
-                                    showPopup = false
-                                }
-                            },
-                            onSnapToLast = {
-                                scope.launch {
-                                    state.snapTo(state.max - 1)
-                                    showPopup = false
-                                }
+                            state = state,
+                            interaction = interaction,
+                            onConfigChange = {
+                                interaction = it
                             },
                             onDismiss = {
                                 showPopup = false
@@ -117,6 +116,46 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+@Composable
+private fun SettingsPopup(
+    state: PageCurlState,
+    interaction: InteractionConfig,
+    onConfigChange: (InteractionConfig) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    SettingsPopup(
+        interactionConfig = interaction,
+        onAction = { action ->
+            when (action) {
+                SettingsAction.GoToFirst -> {
+                    scope.launch {
+                        state.snapTo(0)
+                    }
+                }
+                SettingsAction.GoToLast -> {
+                    scope.launch {
+                        state.snapTo(state.max - 1)
+                    }
+                }
+                is SettingsAction.ForwardDragEnabled -> {
+                    onConfigChange(interaction.copy(dragForwardEnabled = action.value))
+                }
+                is SettingsAction.BackwardDragEnabled -> {
+                    onConfigChange(interaction.copy(dragBackwardEnabled = action.value))
+                }
+                is SettingsAction.ForwardTapEnabled -> {
+                    onConfigChange(interaction.copy(tapForwardEnabled = action.value))
+                }
+                is SettingsAction.BackwardTapEnabled -> {
+                    onConfigChange(interaction.copy(tapBackwardEnabled = action.value))
+                }
+            }
+        },
+        onDismiss = onDismiss
+    )
 }
 
 private object Data {
