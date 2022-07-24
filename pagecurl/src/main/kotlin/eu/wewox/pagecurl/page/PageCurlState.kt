@@ -6,6 +6,7 @@ import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.keyframes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
@@ -52,6 +53,8 @@ public class PageCurlState(
 ) {
     public var current: Int by mutableStateOf(initialCurrent)
         internal set
+
+    public val progress: Float get() = internalState?.progress ?: 0f
 
     internal var internalState: InternalState? by mutableStateOf(null)
 
@@ -101,6 +104,16 @@ public class PageCurlState(
 
         var animateJob: Job? = null
 
+        val progress: Float by derivedStateOf {
+            if (forward.value != rightEdge) {
+                1f - forward.value.centerX / constraints.maxWidth
+            } else if (backward.value != leftEdge) {
+                -backward.value.centerX / constraints.maxWidth
+            } else {
+                0f
+            }
+        }
+
         suspend fun reset() {
             forward.snapTo(rightEdge)
             backward.snapTo(leftEdge)
@@ -134,6 +147,9 @@ public class PageCurlState(
 }
 
 public data class Edge(val top: Offset, val bottom: Offset) {
+
+    internal val centerX: Float = (top.x + bottom.x) * 0.5f
+
     internal companion object {
         val VectorConverter: TwoWayConverter<Edge, AnimationVector4D> =
             TwoWayConverter(

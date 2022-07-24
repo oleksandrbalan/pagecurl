@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,8 +30,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toOffset
 import eu.wewox.pagecurl.components.SettingsAction
 import eu.wewox.pagecurl.components.SettingsPopup
+import eu.wewox.pagecurl.config.CurlConfig
 import eu.wewox.pagecurl.config.InteractionConfig
 import eu.wewox.pagecurl.config.PageCurlConfig
+import eu.wewox.pagecurl.config.ShadowConfig
 import eu.wewox.pagecurl.config.copy
 import eu.wewox.pagecurl.page.PageCurl
 import eu.wewox.pagecurl.page.PageCurlState
@@ -63,9 +66,23 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
+                    val curlConfig by derivedStateOf {
+                        val offset = if (state.progress > 0f) 0f else 1f
+                        val shadowAlpha = (offset + state.progress) * 0.5f
+
+                        CurlConfig(
+                            shadow = ShadowConfig(
+                                alpha = shadowAlpha
+                            )
+                        )
+                    }
+
                     PageCurl(
                         state = state,
-                        config = PageCurlConfig(interaction = interaction)
+                        config = PageCurlConfig(
+                            curl = curlConfig,
+                            interaction = interaction
+                        )
                     ) { index ->
                         Box(
                             modifier = Modifier
