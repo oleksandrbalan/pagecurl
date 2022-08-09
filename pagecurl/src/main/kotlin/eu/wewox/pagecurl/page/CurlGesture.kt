@@ -77,6 +77,7 @@ internal fun Modifier.curlGesture(
         return@pointerInput
     }
 
+    // Use velocity tracker to support flings
     val velocityTracker = VelocityTracker()
     val startRect by lazy { direction.start.multiply(size) }
     val endRect by lazy { direction.end.multiply(size) }
@@ -87,6 +88,7 @@ internal fun Modifier.curlGesture(
                 return@awaitPointerEventScope
             }
 
+            // Change X position to be always on the right side for more convenient gesture tracking
             val dragStart = down.position.copy(x = size.width.toFloat())
 
             onStart()

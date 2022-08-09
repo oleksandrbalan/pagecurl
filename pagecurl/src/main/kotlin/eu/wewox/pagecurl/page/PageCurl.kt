@@ -10,6 +10,14 @@ import androidx.compose.ui.Modifier
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.config.PageCurlConfig
 
+/**
+ * Shows the pages which may be rotated by drag or tap gestures.
+ *
+ * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
+ * @param modifier The modifier for this composable.
+ * @param config The configuration for PageCurl. Configures how page curl looks like and interacts.
+ * @param content The content lambda to provide the page composable. Receives the page number.
+ */
 @ExperimentalPageCurlApi
 @Composable
 public fun PageCurl(

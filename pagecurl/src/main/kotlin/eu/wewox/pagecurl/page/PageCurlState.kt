@@ -22,6 +22,13 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Remembers the [PageCurlState].
+ *
+ * @param max The max number of pages.
+ * @param initialCurrent The initial current page.
+ * @return The remembered [PageCurlState].
+ */
 @ExperimentalPageCurlApi
 @Composable
 public fun rememberPageCurlState(
@@ -46,14 +53,27 @@ public fun rememberPageCurlState(
         )
     }
 
+/**
+ * The state of the PageCurl.
+ *
+ * @property max The max number of pages.
+ * @param initialCurrent The initial current page.
+ */
 @ExperimentalPageCurlApi
 public class PageCurlState(
     public val max: Int,
     initialCurrent: Int = 0,
 ) {
+    /**
+     * The observable current page.
+     */
     public var current: Int by mutableStateOf(initialCurrent)
         internal set
 
+    /**
+     * The observable progress as page is rotated.
+     * When going forward it changes from 0 to 1, when going backward it is going from 0 to -1.
+     */
     public val progress: Float get() = internalState?.progress ?: 0f
 
     internal var internalState: InternalState? by mutableStateOf(null)
@@ -75,11 +95,21 @@ public class PageCurlState(
         internalState = InternalState(constraints, left, right, forward, backward)
     }
 
+    /**
+     * Instantly snaps the state to the given page.
+     *
+     * @param value The page to snap to.
+     */
     public suspend fun snapTo(value: Int) {
         current = value.coerceIn(0, max - 1)
         internalState?.reset()
     }
 
+    /**
+     * Go forward with an animation.
+     *
+     * @param block The animation block to animate a change.
+     */
     public suspend fun next(block: suspend Animatable<Edge, AnimationVector4D>.(Size) -> Unit = DefaultNext) {
         internalState?.animateTo(
             target = { current + 1 },
@@ -87,6 +117,11 @@ public class PageCurlState(
         )
     }
 
+    /**
+     * Go backward with an animation.
+     *
+     * @param block The animation block to animate a change.
+     */
     public suspend fun prev(block: suspend Animatable<Edge, AnimationVector4D>.(Size) -> Unit = DefaultPrev) {
         internalState?.animateTo(
             target = { current - 1 },
@@ -146,6 +181,9 @@ public class PageCurlState(
     }
 }
 
+/**
+ * The wrapper to represent a line with 2 points: [top] and [bottom].
+ */
 public data class Edge(val top: Offset, val bottom: Offset) {
 
     internal val centerX: Float = (top.x + bottom.x) * 0.5f
