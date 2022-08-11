@@ -71,7 +71,7 @@ public class PageCurlState(
         internal set
 
     /**
-     * The observable progress as page is rotated.
+     * The observable progress as page is turned.
      * When going forward it changes from 0 to 1, when going backward it is going from 0 to -1.
      */
     public val progress: Float get() = internalState?.progress ?: 0f

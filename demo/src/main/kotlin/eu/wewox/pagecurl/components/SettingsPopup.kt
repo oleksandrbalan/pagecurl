@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,20 +21,12 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.config.InteractionConfig
-
-internal sealed interface SettingsAction {
-    object GoToFirst : SettingsAction
-    object GoToLast : SettingsAction
-    class ForwardDragEnabled(val value: Boolean) : SettingsAction
-    class BackwardDragEnabled(val value: Boolean) : SettingsAction
-    class ForwardTapEnabled(val value: Boolean) : SettingsAction
-    class BackwardTapEnabled(val value: Boolean) : SettingsAction
-}
+import eu.wewox.pagecurl.config.copy
 
 @Composable
 internal fun SettingsPopup(
-    interactionConfig: InteractionConfig,
-    onAction: (SettingsAction) -> Unit,
+    interaction: InteractionConfig,
+    onConfigChange: (InteractionConfig) -> Unit,
     onDismiss: () -> Unit,
 ) {
     Popup(
@@ -53,38 +44,31 @@ internal fun SettingsPopup(
                     .width(IntrinsicSize.Max)
                     .padding(8.dp)
             ) {
-                TextButton(onClick = { onAction(SettingsAction.GoToFirst) }) {
-                    Text("Go to first")
-                }
-                TextButton(onClick = { onAction(SettingsAction.GoToLast) }) {
-                    Text("Go to last")
-                }
-
                 val switchRowModifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp)
                 SwitchRow(
                     text = "Forward drag enabled",
-                    enabled = interactionConfig.drag.forward.enabled,
-                    onChanged = { onAction(SettingsAction.ForwardDragEnabled(it)) },
+                    enabled = interaction.drag.forward.enabled,
+                    onChanged = { onConfigChange(interaction.copy(dragForwardEnabled = it)) },
                     modifier = switchRowModifier
                 )
                 SwitchRow(
                     text = "Backward drag enabled",
-                    enabled = interactionConfig.drag.backward.enabled,
-                    onChanged = { onAction(SettingsAction.BackwardDragEnabled(it)) },
+                    enabled = interaction.drag.backward.enabled,
+                    onChanged = { onConfigChange(interaction.copy(dragBackwardEnabled = it)) },
                     modifier = switchRowModifier
                 )
                 SwitchRow(
                     text = "Forward tap enabled",
-                    enabled = interactionConfig.tap.forward.enabled,
-                    onChanged = { onAction(SettingsAction.ForwardTapEnabled(it)) },
+                    enabled = interaction.tap.forward.enabled,
+                    onChanged = { onConfigChange(interaction.copy(tapForwardEnabled = it)) },
                     modifier = switchRowModifier
                 )
                 SwitchRow(
                     text = "Backward tap enabled",
-                    enabled = interactionConfig.tap.backward.enabled,
-                    onChanged = { onAction(SettingsAction.BackwardTapEnabled(it)) },
+                    enabled = interaction.tap.backward.enabled,
+                    onChanged = { onConfigChange(interaction.copy(tapBackwardEnabled = it)) },
                     modifier = switchRowModifier
                 )
             }

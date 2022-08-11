@@ -11,7 +11,7 @@ import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.config.PageCurlConfig
 
 /**
- * Shows the pages which may be rotated by drag or tap gestures.
+ * Shows the pages which may be turned by drag or tap gestures.
  *
  * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
  * @param modifier The modifier for this composable.
