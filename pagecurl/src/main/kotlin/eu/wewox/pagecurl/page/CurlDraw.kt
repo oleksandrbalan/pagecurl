@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
-import eu.wewox.pagecurl.config.CurlConfig
+import eu.wewox.pagecurl.config.PageCurlConfig
 import eu.wewox.pagecurl.utils.Polygon
 import eu.wewox.pagecurl.utils.lineLineIntersection
 import eu.wewox.pagecurl.utils.rotate
@@ -30,7 +30,7 @@ import kotlin.math.atan2
 
 @ExperimentalPageCurlApi
 internal fun Modifier.drawCurl(
-    config: CurlConfig = CurlConfig(),
+    config: PageCurlConfig,
     posA: Offset,
     posB: Offset,
 ): Modifier = drawWithCache {
@@ -114,7 +114,7 @@ private fun CacheDrawScope.prepareClippedContent(
 
 @ExperimentalPageCurlApi
 private fun CacheDrawScope.prepareCurl(
-    config: CurlConfig,
+    config: PageCurlConfig,
     topCurlOffset: Offset,
     bottomCurlOffset: Offset,
 ): ContentDrawScope.() -> Unit {
@@ -176,8 +176,8 @@ private fun CacheDrawScope.prepareCurl(
             clipPath(polygon.toPath()) {
                 this@result.drawContent()
 
-                val overlayAlpha = 1f - config.backPage.contentAlpha
-                drawRect(config.backPage.color.copy(alpha = overlayAlpha))
+                val overlayAlpha = 1f - config.backPageContentAlpha
+                drawRect(config.backPageColor.copy(alpha = overlayAlpha))
             }
         }
     }
@@ -185,22 +185,20 @@ private fun CacheDrawScope.prepareCurl(
 
 @ExperimentalPageCurlApi
 private fun CacheDrawScope.prepareShadow(
-    config: CurlConfig,
+    config: PageCurlConfig,
     polygon: Polygon,
     angle: Float
 ): ContentDrawScope.() -> Unit {
-    val shadow = config.shadow
-
     // Quick exit if no shadow is requested
-    if (shadow.alpha == 0f || shadow.radius == 0.dp) {
+    if (config.shadowAlpha == 0f || config.shadowRadius == 0.dp) {
         return { /* No shadow is requested */ }
     }
 
     // Prepare shadow parameters
-    val radius = shadow.radius.toPx()
-    val shadowColor = shadow.color.copy(alpha = shadow.alpha).toArgb()
-    val transparent = shadow.color.copy(alpha = 0f).toArgb()
-    val shadowOffset = Offset(-shadow.offset.x.toPx(), shadow.offset.y.toPx())
+    val radius = config.shadowRadius.toPx()
+    val shadowColor = config.shadowColor.copy(alpha = config.shadowAlpha).toArgb()
+    val transparent = config.shadowColor.copy(alpha = 0f).toArgb()
+    val shadowOffset = Offset(-config.shadowOffset.x.toPx(), config.shadowOffset.y.toPx())
         .rotate(2 * Math.PI.toFloat() - angle)
 
     // Prepare shadow paint with a shadow layer
@@ -208,7 +206,7 @@ private fun CacheDrawScope.prepareShadow(
         val frameworkPaint = asFrameworkPaint()
         frameworkPaint.color = transparent
         frameworkPaint.setShadowLayer(
-            shadow.radius.toPx(),
+            config.shadowRadius.toPx(),
             shadowOffset.x,
             shadowOffset.y,
             shadowColor

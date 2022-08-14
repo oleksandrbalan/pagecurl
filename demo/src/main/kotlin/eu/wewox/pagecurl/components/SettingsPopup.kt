@@ -20,13 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
-import eu.wewox.pagecurl.config.InteractionConfig
-import eu.wewox.pagecurl.config.copy
+import eu.wewox.pagecurl.config.PageCurlConfig
 
 @Composable
 internal fun SettingsPopup(
-    interaction: InteractionConfig,
-    onConfigChange: (InteractionConfig) -> Unit,
+    config: PageCurlConfig,
     onDismiss: () -> Unit,
 ) {
     Popup(
@@ -49,26 +47,26 @@ internal fun SettingsPopup(
                     .padding(horizontal = 10.dp)
                 SwitchRow(
                     text = "Forward drag enabled",
-                    enabled = interaction.drag.forward.enabled,
-                    onChanged = { onConfigChange(interaction.copy(dragForwardEnabled = it)) },
+                    enabled = config.dragForwardEnabled,
+                    onChanged = { config.dragForwardEnabled = it },
                     modifier = switchRowModifier
                 )
                 SwitchRow(
                     text = "Backward drag enabled",
-                    enabled = interaction.drag.backward.enabled,
-                    onChanged = { onConfigChange(interaction.copy(dragBackwardEnabled = it)) },
+                    enabled = config.dragBackwardEnabled,
+                    onChanged = { config.dragBackwardEnabled = it },
                     modifier = switchRowModifier
                 )
                 SwitchRow(
                     text = "Forward tap enabled",
-                    enabled = interaction.tap.forward.enabled,
-                    onChanged = { onConfigChange(interaction.copy(tapForwardEnabled = it)) },
+                    enabled = config.tapForwardEnabled,
+                    onChanged = { config.tapForwardEnabled = it },
                     modifier = switchRowModifier
                 )
                 SwitchRow(
                     text = "Backward tap enabled",
-                    enabled = interaction.tap.backward.enabled,
-                    onChanged = { onConfigChange(interaction.copy(tapBackwardEnabled = it)) },
+                    enabled = config.tapBackwardEnabled,
+                    onChanged = { config.tapBackwardEnabled = it },
                     modifier = switchRowModifier
                 )
             }

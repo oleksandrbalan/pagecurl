@@ -15,7 +15,6 @@ import eu.wewox.pagecurl.config.PageCurlConfig
  *
  * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
  * @param modifier The modifier for this composable.
- * @param config The configuration for PageCurl. Configures how page curl looks like and interacts.
  * @param content The content lambda to provide the page composable. Receives the page number.
  */
 @ExperimentalPageCurlApi
@@ -23,7 +22,6 @@ import eu.wewox.pagecurl.config.PageCurlConfig
 public fun PageCurl(
     state: PageCurlState,
     modifier: Modifier = Modifier,
-    config: PageCurlConfig = PageCurlConfig(),
     content: @Composable (Int) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -34,32 +32,35 @@ public fun PageCurl(
 
         val internalState by rememberUpdatedState(state.internalState ?: return@BoxWithConstraints)
 
+        val config by rememberUpdatedState(state.config)
+
         Box(
             Modifier
                 .curlGesture(
                     state = internalState,
-                    enabled = config.interaction.drag.forward.enabled && updatedCurrent < state.max - 1,
+                    enabled = state.config.dragForwardEnabled && updatedCurrent < state.max - 1,
                     scope = scope,
-                    direction = config.interaction.drag.forward,
-                    start = internalState.rightEdge,
-                    end = internalState.leftEdge,
+                    targetStart = config.dragForwardInteraction.start,
+                    targetEnd = config.dragForwardInteraction.end,
+                    edgeStart = internalState.rightEdge,
+                    edgeEnd = internalState.leftEdge,
                     edge = internalState.forward,
                     onChange = { state.current = updatedCurrent + 1 }
                 )
                 .curlGesture(
                     state = internalState,
-                    enabled = config.interaction.drag.backward.enabled && updatedCurrent > 0,
+                    enabled = state.config.dragBackwardEnabled && updatedCurrent > 0,
                     scope = scope,
-                    direction = config.interaction.drag.backward,
-                    start = internalState.leftEdge,
-                    end = internalState.rightEdge,
+                    targetStart = config.dragBackwardInteraction.start,
+                    targetEnd = config.dragBackwardInteraction.end,
+                    edgeStart = internalState.leftEdge,
+                    edgeEnd = internalState.rightEdge,
                     edge = internalState.backward,
                     onChange = { state.current = updatedCurrent - 1 }
                 )
                 .tapGesture(
-                    state = internalState,
+                    config = config,
                     scope = scope,
-                    interaction = config.interaction.tap,
                     onTapForward = state::next,
                     onTapBackward = state::prev,
                 )
@@ -69,13 +70,13 @@ public fun PageCurl(
             }
 
             if (updatedCurrent < state.max) {
-                Box(Modifier.drawCurl(config.curl, internalState.forward.value.top, internalState.forward.value.bottom)) {
+                Box(Modifier.drawCurl(config, internalState.forward.value.top, internalState.forward.value.bottom)) {
                     content(updatedCurrent)
                 }
             }
 
             if (updatedCurrent > 0) {
-                Box(Modifier.drawCurl(config.curl, internalState.backward.value.top, internalState.backward.value.bottom)) {
+                Box(Modifier.drawCurl(config, internalState.backward.value.top, internalState.backward.value.bottom)) {
                     content(updatedCurrent - 1)
                 }
             }

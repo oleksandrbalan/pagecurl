@@ -16,6 +16,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,9 +31,7 @@ import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.HowToPageData
 import eu.wewox.pagecurl.components.HowToPage
 import eu.wewox.pagecurl.components.ZoomOutLayout
-import eu.wewox.pagecurl.config.InteractionConfig
-import eu.wewox.pagecurl.config.PageCurlConfig
-import eu.wewox.pagecurl.config.copy
+import eu.wewox.pagecurl.config.rememberPageCurlConfig
 import eu.wewox.pagecurl.page.PageCurl
 import eu.wewox.pagecurl.page.PageCurlState
 import eu.wewox.pagecurl.page.rememberPageCurlState
@@ -44,28 +43,34 @@ import kotlinx.coroutines.launch
 fun StatePageCurlScreen() {
     Box(Modifier.fillMaxSize()) {
         val pages = remember { HowToPageData.interactionHowToPages }
-        val state = rememberPageCurlState(max = pages.size)
-
         var zoomOut by remember { mutableStateOf(false) }
-
-        val interactionConfig = remember {
-            InteractionConfig(
-                tap = InteractionConfig.Tap(
-                    custom = InteractionConfig.Tap.CustomInteraction(true) { size, position ->
-                        // When PageCurl is zoomed out then zoom back in
-                        // Else detect tap somewhere in the center with 64 radius and zoom out a PageCurl
-                        if (zoomOut) {
-                            zoomOut = false
-                            true
-                        } else if ((position - size.center.toOffset()).getDistance() < 64.dp.toPx()) {
-                            zoomOut = true
-                            true
-                        } else {
-                            false
-                        }
+        val state = rememberPageCurlState(
+            max = pages.size,
+            config = rememberPageCurlConfig(
+                onCustomTap = { size, position ->
+                    // When PageCurl is zoomed out then zoom back in
+                    // Else detect tap somewhere in the center with 64 radius and zoom out a PageCurl
+                    if (zoomOut) {
+                        zoomOut = false
+                        true
+                    } else if ((position - size.center.toOffset()).getDistance() < 64.dp.toPx()) {
+                        zoomOut = true
+                        true
+                    } else {
+                        false
                     }
-                )
+                }
             )
+        )
+
+        // Disable all state interactions when PageCurl is zoomed out
+        LaunchedEffect(zoomOut) {
+            with(state.config) {
+                dragForwardEnabled = !zoomOut
+                dragBackwardEnabled = !zoomOut
+                tapForwardEnabled = !zoomOut
+                tapBackwardEnabled = !zoomOut
+            }
         }
 
         ZoomOutLayout(
@@ -79,17 +84,7 @@ fun StatePageCurlScreen() {
                 shape = RoundedCornerShape(cornersAndElevation),
                 elevation = cornersAndElevation,
             ) {
-                PageCurl(
-                    state = state,
-                    config = PageCurlConfig(
-                        interaction = interactionConfig.copy(
-                            dragForwardEnabled = !zoomOut,
-                            dragBackwardEnabled = !zoomOut,
-                            tapForwardEnabled = !zoomOut,
-                            tapBackwardEnabled = !zoomOut,
-                        )
-                    )
-                ) { index ->
+                PageCurl(state = state) { index ->
                     HowToPage(index, pages[index])
                 }
             }

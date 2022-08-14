@@ -16,6 +16,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.Constraints
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
+import eu.wewox.pagecurl.config.PageCurlConfig
+import eu.wewox.pagecurl.config.rememberPageCurlConfig
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
@@ -27,6 +29,7 @@ import kotlinx.coroutines.withContext
  *
  * @param max The max number of pages.
  * @param initialCurrent The initial current page.
+ * @param config The configuration for PageCurl.
  * @return The remembered [PageCurlState].
  */
 @ExperimentalPageCurlApi
@@ -34,6 +37,7 @@ import kotlinx.coroutines.withContext
 public fun rememberPageCurlState(
     max: Int,
     initialCurrent: Int = 0,
+    config: PageCurlConfig = rememberPageCurlConfig()
 ): PageCurlState =
     rememberSaveable(
         max, initialCurrent,
@@ -41,15 +45,17 @@ public fun rememberPageCurlState(
             save = { it.current },
             restore = {
                 PageCurlState(
-                    max = it,
-                    initialCurrent = initialCurrent
+                    max = max,
+                    initialCurrent = it,
+                    config = config,
                 )
             }
         )
     ) {
         PageCurlState(
             max = max,
-            initialCurrent = initialCurrent
+            initialCurrent = initialCurrent,
+            config = config,
         )
     }
 
@@ -62,6 +68,7 @@ public fun rememberPageCurlState(
 @ExperimentalPageCurlApi
 public class PageCurlState(
     public val max: Int,
+    public val config: PageCurlConfig,
     initialCurrent: Int = 0,
 ) {
     /**

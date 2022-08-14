@@ -10,10 +10,10 @@ import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
-import eu.wewox.pagecurl.config.InteractionConfig
 import eu.wewox.pagecurl.utils.multiply
 import eu.wewox.pagecurl.utils.rotate
 import kotlinx.coroutines.CoroutineScope
@@ -25,20 +25,22 @@ internal fun Modifier.curlGesture(
     state: PageCurlState.InternalState,
     enabled: Boolean,
     scope: CoroutineScope,
-    direction: InteractionConfig.Drag.Interaction,
-    start: Edge,
-    end: Edge,
+    targetStart: Rect,
+    targetEnd: Rect,
+    edgeStart: Edge,
+    edgeEnd: Edge,
     edge: Animatable<Edge, AnimationVector4D>,
     onChange: () -> Unit,
 ): Modifier =
     curlGesture(
         key = state,
         enabled = enabled,
-        direction = direction,
+        targetStart = targetStart,
+        targetEnd = targetEnd,
         onStart = {
             scope.launch {
                 state.animateJob?.cancel()
-                edge.snapTo(start)
+                edge.snapTo(edgeStart)
             }
         },
         onCurl = { a, b ->
@@ -49,16 +51,16 @@ internal fun Modifier.curlGesture(
         onEnd = {
             scope.launch {
                 try {
-                    edge.animateTo(end)
+                    edge.animateTo(edgeEnd)
                 } finally {
                     onChange()
-                    edge.snapTo(start)
+                    edge.snapTo(edgeStart)
                 }
             }
         },
         onCancel = {
             scope.launch {
-                edge.animateTo(start)
+                edge.animateTo(edgeStart)
             }
         },
     )
@@ -67,7 +69,8 @@ internal fun Modifier.curlGesture(
 internal fun Modifier.curlGesture(
     key: Any?,
     enabled: Boolean,
-    direction: InteractionConfig.Drag.Interaction,
+    targetStart: Rect,
+    targetEnd: Rect,
     onStart: () -> Unit,
     onCurl: (Offset, Offset) -> Unit,
     onEnd: () -> Unit,
@@ -79,8 +82,8 @@ internal fun Modifier.curlGesture(
 
     // Use velocity tracker to support flings
     val velocityTracker = VelocityTracker()
-    val startRect by lazy { direction.start.multiply(size) }
-    val endRect by lazy { direction.end.multiply(size) }
+    val startRect by lazy { targetStart.multiply(size) }
+    val endRect by lazy { targetEnd.multiply(size) }
     forEachGesture {
         awaitPointerEventScope {
             val down = awaitFirstDown(requireUnconsumed = false)
