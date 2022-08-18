@@ -8,7 +8,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
-import eu.wewox.pagecurl.config.PageCurlConfig
 
 /**
  * Shows the pages which may be turned by drag or tap gestures.

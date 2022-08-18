@@ -28,10 +28,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import eu.wewox.pagecurl.components.TopBar
-import eu.wewox.pagecurl.screens.AnimatePageCurlScreen
+import eu.wewox.pagecurl.screens.BackPagePageCurlScreen
+import eu.wewox.pagecurl.screens.InteractionConfigInPageCurlScreen
 import eu.wewox.pagecurl.screens.SettingsPageCurlScreen
+import eu.wewox.pagecurl.screens.ShadowInPageCurlScreen
 import eu.wewox.pagecurl.screens.SimplePageCurlScreen
-import eu.wewox.pagecurl.screens.StatePageCurlScreen
+import eu.wewox.pagecurl.screens.StateInPageCurlScreen
 import eu.wewox.pagecurl.ui.SpacingMedium
 import eu.wewox.pagecurl.ui.theme.PageCurlTheme
 
@@ -58,8 +60,10 @@ class MainActivity : ComponentActivity() {
                         null -> RootScreen(onExampleClick = { example = it })
                         Example.SimplePageCurl -> SimplePageCurlScreen()
                         Example.SettingsPageCurl -> SettingsPageCurlScreen()
-                        Example.CustomPageCurl -> StatePageCurlScreen()
-                        Example.AnimatePageCurl -> AnimatePageCurlScreen()
+                        Example.StateInPageCurl -> StateInPageCurlScreen()
+                        Example.InteractionConfigInPageCurl -> InteractionConfigInPageCurlScreen()
+                        Example.ShadowPageCurl -> ShadowInPageCurlScreen()
+                        Example.BackPagePageCurl -> BackPagePageCurlScreen()
                     }
                 }
             }

@@ -2,7 +2,6 @@
 
 package eu.wewox.pagecurl.screens
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,12 +10,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
-import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,9 +36,9 @@ import eu.wewox.pagecurl.ui.SpacingMedium
 import kotlinx.coroutines.launch
 
 @Composable
-fun StatePageCurlScreen() {
+fun StateInPageCurlScreen() {
     Box(Modifier.fillMaxSize()) {
-        val pages = remember { HowToPageData.interactionHowToPages }
+        val pages = remember { HowToPageData.stateHowToPages }
         var zoomOut by remember { mutableStateOf(false) }
         val state = rememberPageCurlState(
             max = pages.size,
@@ -63,30 +59,13 @@ fun StatePageCurlScreen() {
             )
         )
 
-        // Disable all state interactions when PageCurl is zoomed out
-        LaunchedEffect(zoomOut) {
-            with(state.config) {
-                dragForwardEnabled = !zoomOut
-                dragBackwardEnabled = !zoomOut
-                tapForwardEnabled = !zoomOut
-                tapBackwardEnabled = !zoomOut
-            }
-        }
-
         ZoomOutLayout(
             zoomOut = zoomOut,
-            bottom = { SettingsRow(state) }
+            config = state.config,
+            bottom = { SettingsRow(state) },
         ) {
-            // Animate radius and elevation with the same value, because we not :)
-            val cornersAndElevation by animateDpAsState(if (zoomOut) 16.dp else 0.dp)
-
-            Card(
-                shape = RoundedCornerShape(cornersAndElevation),
-                elevation = cornersAndElevation,
-            ) {
-                PageCurl(state = state) { index ->
-                    HowToPage(index, pages[index])
-                }
+            PageCurl(state = state) { index ->
+                HowToPage(index, pages[index])
             }
         }
     }

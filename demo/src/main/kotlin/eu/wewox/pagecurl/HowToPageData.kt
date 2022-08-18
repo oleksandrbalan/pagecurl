@@ -42,5 +42,66 @@ data class HowToPageData(
                 "That is the last page, you cannot go further \uD83D\uDE09",
             )
         )
+
+        val stateHowToPages = listOf(
+            HowToPageData(
+                "State example",
+                "This example demonstrates how state object can be used to change current page.",
+            ),
+            HowToPageData(
+                "Custom tap",
+                "This example has a custom tap configured to show a settings row below. Try it and tap somewhere near the center of the page. Tap on the PageCurl to zoom back in.",
+            ),
+            HowToPageData(
+                "Settings",
+                "Use buttons to go to the first / last page, or try to snap / animate forward or backward. The .snapTo() method changes the current page immediately, but .next() and .prev() methods changes the current page with a default animation. This animation could be customized, see DefaultNext and DefaultPrev in library sources.",
+            ),
+            HowToPageData(
+                "End",
+                "That is the last page, you cannot go further \uD83D\uDE09",
+            )
+        )
+
+        val interactionSettingsHowToPages = listOf(
+            HowToPageData(
+                "Another interaction example",
+                "This example demonstrates how drag & tap gestures zones can be configured. By default it is right half to go forward and left half to go backward.",
+            ),
+            HowToPageData(
+                "Custom tap",
+                "This example has a custom tap configured to show a settings row below. Try it and tap somewhere near the center of the page. Tap on the PageCurl to zoom back in.",
+            ),
+            HowToPageData(
+                "Settings",
+                "Try to change the slider value and see how it changes the gesture zones. For example if you set 0.25f on the tap gesture this means, that the first 25% of the width will be dedicated for backward tap, and other 75% will be used for forward tap.",
+            ),
+            HowToPageData(
+                "End region in drag",
+                "Keep in mind, that drag gestures have 'end' region (where gesture should be ended to complete a drag), so if you set 0f for drag gesture, the only forward gesture will be allowed, but it could not be completed. You can modify the 'end' region as needed for your use-case.",
+            ),
+            HowToPageData(
+                "End",
+                "That is the last page, you cannot go further \uD83D\uDE09",
+            )
+        )
+
+        val shadowHowToPages = listOf(
+            HowToPageData(
+                "Shadow configuration",
+                "This example demonstrates how shadow can be configured.",
+            ),
+            HowToPageData(
+                "Custom tap",
+                "This example has a custom tap configured to show a settings row below. Try it and tap somewhere near the center of the page. Tap on the PageCurl to zoom back in.",
+            ),
+            HowToPageData(
+                "Settings",
+                "Try to change different sliders. Settings should be self-descriptive. You may also change the shadow color (not present in the example).",
+            ),
+            HowToPageData(
+                "End",
+                "That is the last page, you cannot go further \uD83D\uDE09",
+            )
+        )
     }
 }
