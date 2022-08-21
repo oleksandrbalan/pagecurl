@@ -1,3 +1,5 @@
+@file:Suppress("LongParameterList", "LongMethod")
+
 package eu.wewox.pagecurl.config
 
 import androidx.compose.runtime.Composable

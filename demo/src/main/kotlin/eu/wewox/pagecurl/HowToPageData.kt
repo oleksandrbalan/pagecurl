@@ -1,9 +1,18 @@
+@file:Suppress("MaxLineLength", "UndocumentedPublicProperty")
+
 package eu.wewox.pagecurl
 
+/**
+ * The model for data for the page.
+ *
+ * @property title The title to show on the page.
+ * @property message The message to show on the page.
+ */
 data class HowToPageData(
     val title: String,
     val message: String,
 ) {
+
     companion object {
         val simpleHowToPages = listOf(
             HowToPageData(

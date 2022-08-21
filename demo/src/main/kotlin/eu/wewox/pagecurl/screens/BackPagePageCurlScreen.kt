@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalPageCurlApi::class)
+@file:Suppress("MagicNumber")
 
 package eu.wewox.pagecurl.screens
 
@@ -42,6 +43,10 @@ import eu.wewox.pagecurl.ui.SpacingLarge
 import eu.wewox.pagecurl.ui.SpacingMedium
 import eu.wewox.pagecurl.ui.SpacingSmall
 
+/**
+ * Back-Page Configuration in Page Curl.
+ * Example how to customize the back-page (the back of the page user see during the drag or animation).
+ */
 @Composable
 fun BackPagePageCurlScreen() {
     Box(Modifier.fillMaxSize()) {
@@ -86,7 +91,7 @@ private fun SettingsRow(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = SpacingMedium)
+            .padding(vertical = SpacingLarge)
     ) {
         Text(
             text = "Alpha",

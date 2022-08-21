@@ -18,6 +18,13 @@ import eu.wewox.pagecurl.HowToPageData
 import eu.wewox.pagecurl.ui.SpacingLarge
 import eu.wewox.pagecurl.ui.SpacingMedium
 
+/**
+ * The simple page to use for demo purposes.
+ *
+ * @param index The index of the page to show a page number in the bottom.
+ * @param page The page data to show.
+ * @param modifier The modifier for this composable.
+ */
 @Composable
 fun HowToPage(
     index: Int,

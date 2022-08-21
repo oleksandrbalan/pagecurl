@@ -63,6 +63,7 @@ public fun rememberPageCurlState(
  * The state of the PageCurl.
  *
  * @property max The max number of pages.
+ * @property config The configuration for PageCurl.
  * @param initialCurrent The initial current page.
  */
 @ExperimentalPageCurlApi

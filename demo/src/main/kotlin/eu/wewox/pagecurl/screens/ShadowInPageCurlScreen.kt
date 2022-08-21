@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalPageCurlApi::class)
+@file:Suppress("MagicNumber")
 
 package eu.wewox.pagecurl.screens
 
@@ -29,6 +30,10 @@ import eu.wewox.pagecurl.page.PageCurl
 import eu.wewox.pagecurl.page.rememberPageCurlState
 import eu.wewox.pagecurl.ui.SpacingLarge
 
+/**
+ * Shadow Configuration in Page Curl.
+ * Example how to customize shadow of the page.
+ */
 @Composable
 fun ShadowInPageCurlScreen() {
     Box(Modifier.fillMaxSize()) {

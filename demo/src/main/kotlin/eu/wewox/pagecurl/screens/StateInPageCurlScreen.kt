@@ -35,6 +35,10 @@ import eu.wewox.pagecurl.ui.SpacingLarge
 import eu.wewox.pagecurl.ui.SpacingMedium
 import kotlinx.coroutines.launch
 
+/**
+ * Page Curl With State Management.
+ * Example how state can be used to change current page (snap / animate).
+ */
 @Composable
 fun StateInPageCurlScreen() {
     Box(Modifier.fillMaxSize()) {

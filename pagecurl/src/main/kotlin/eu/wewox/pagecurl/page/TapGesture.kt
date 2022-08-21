@@ -38,7 +38,11 @@ internal fun Modifier.tapGesture(
                 return@awaitPointerEventScope
             }
 
-            if (config.tapBackwardEnabled && config.tapBackwardInteraction.target.multiply(size).contains(up.position)) {
+            if (config.tapBackwardEnabled &&
+                config.tapBackwardInteraction.target
+                    .multiply(size)
+                    .contains(up.position)
+            ) {
                 scope.launch {
                     onTapBackward()
                 }

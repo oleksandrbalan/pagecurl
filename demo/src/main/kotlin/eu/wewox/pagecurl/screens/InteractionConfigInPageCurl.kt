@@ -38,6 +38,10 @@ import eu.wewox.pagecurl.ui.SpacingLarge
 import eu.wewox.pagecurl.ui.SpacingMedium
 import eu.wewox.pagecurl.ui.SpacingSmall
 
+/**
+ * Interactions Configurations In Page Curl.
+ * Example interactions (drag / tap) can be customized.
+ */
 @Composable
 fun InteractionConfigInPageCurlScreen() {
     Box(Modifier.fillMaxSize()) {
@@ -114,37 +118,48 @@ private fun SettingsRow(
             }
         }
 
-        when (selectedOption) {
-            InteractionOption.Drag -> {
-                Slider(
-                    value = config.dragForwardInteraction.start.left,
-                    onValueChange = {
-                        config.dragForwardInteraction = PageCurlConfig.DragInteraction(
-                            Rect(it, 0.0f, 1.0f, 1.0f),
-                            Rect(0.0f, 0.0f, it, 1.0f)
-                        )
-                        config.dragBackwardInteraction = PageCurlConfig.DragInteraction(
-                            Rect(0.0f, 0.0f, it, 1.0f),
-                            Rect(it, 0.0f, 1.0f, 1.0f),
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-            InteractionOption.Tap -> {
-                Slider(
-                    value = config.tapForwardInteraction.target.left,
-                    onValueChange = {
-                        config.tapForwardInteraction = PageCurlConfig.TapInteraction(
-                            Rect(it, 0.0f, 1.0f, 1.0f),
-                        )
-                        config.tapBackwardInteraction = PageCurlConfig.TapInteraction(
-                            Rect(0.0f, 0.0f, it, 1.0f),
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+        SettingsRowSlider(
+            selectedOption = selectedOption,
+            config = config,
+        )
+    }
+}
+
+@Composable
+private fun SettingsRowSlider(
+    selectedOption: InteractionOption,
+    config: PageCurlConfig,
+) {
+    when (selectedOption) {
+        InteractionOption.Drag -> {
+            Slider(
+                value = config.dragForwardInteraction.start.left,
+                onValueChange = {
+                    config.dragForwardInteraction = PageCurlConfig.DragInteraction(
+                        Rect(it, 0.0f, 1.0f, 1.0f),
+                        Rect(0.0f, 0.0f, it, 1.0f)
+                    )
+                    config.dragBackwardInteraction = PageCurlConfig.DragInteraction(
+                        Rect(0.0f, 0.0f, it, 1.0f),
+                        Rect(it, 0.0f, 1.0f, 1.0f),
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        InteractionOption.Tap -> {
+            Slider(
+                value = config.tapForwardInteraction.target.left,
+                onValueChange = {
+                    config.tapForwardInteraction = PageCurlConfig.TapInteraction(
+                        Rect(it, 0.0f, 1.0f, 1.0f),
+                    )
+                    config.tapBackwardInteraction = PageCurlConfig.TapInteraction(
+                        Rect(0.0f, 0.0f, it, 1.0f),
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }

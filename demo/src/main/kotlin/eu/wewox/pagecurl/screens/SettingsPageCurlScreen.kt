@@ -22,6 +22,10 @@ import eu.wewox.pagecurl.config.rememberPageCurlConfig
 import eu.wewox.pagecurl.page.PageCurl
 import eu.wewox.pagecurl.page.rememberPageCurlState
 
+/**
+ * Page Curl With Settings.
+ * Showcases how individual interactions can be toggled on / off.
+ */
 @Composable
 fun SettingsPageCurlScreen() {
     Box(Modifier.fillMaxSize()) {

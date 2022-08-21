@@ -20,6 +20,15 @@ import androidx.compose.ui.unit.dp
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.config.PageCurlConfig
 
+/**
+ * Layout which could be zoomed out and zoomed in to show / hide the [bottom] bar.
+ *
+ * @param zoomOut True when layout is zoomed out.
+ * @param config The [PageCurlConfig] to turn off interactions in the page curl.
+ * @param bottom The content of the bottom bar.
+ * @param modifier The modifier for this composable.
+ * @param pageCurl The content where PageCurl should be placed.
+ */
 @Composable
 fun ZoomOutLayout(
     zoomOut: Boolean,
@@ -29,7 +38,7 @@ fun ZoomOutLayout(
     pageCurl: @Composable () -> Unit,
 ) {
     // Disable all state interactions when PageCurl is zoomed out
-    LaunchedEffect(zoomOut) {
+    LaunchedEffect(zoomOut, config) {
         with(config) {
             dragForwardEnabled = !zoomOut
             dragBackwardEnabled = !zoomOut
@@ -54,9 +63,8 @@ fun ZoomOutLayout(
     }
 }
 
-
 @Composable
-fun ZoomOutLayout(
+private fun ZoomOutLayout(
     zoomOut: Boolean,
     bottom: @Composable () -> Unit,
     modifier: Modifier = Modifier,

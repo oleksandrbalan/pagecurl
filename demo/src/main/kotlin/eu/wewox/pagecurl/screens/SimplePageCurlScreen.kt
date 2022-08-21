@@ -13,6 +13,10 @@ import eu.wewox.pagecurl.components.HowToPage
 import eu.wewox.pagecurl.page.PageCurl
 import eu.wewox.pagecurl.page.rememberPageCurlState
 
+/**
+ * Page Curl With Settings.
+ * Showcases how individual interactions can be toggled on / off.
+ */
 @Composable
 fun SimplePageCurlScreen() {
     Box(Modifier.fillMaxSize()) {
