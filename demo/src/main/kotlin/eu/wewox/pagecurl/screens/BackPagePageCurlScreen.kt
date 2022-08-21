@@ -50,7 +50,7 @@ import eu.wewox.pagecurl.ui.SpacingSmall
 @Composable
 fun BackPagePageCurlScreen() {
     Box(Modifier.fillMaxSize()) {
-        val pages = remember { HowToPageData.shadowHowToPages }
+        val pages = remember { HowToPageData.backPageHowToPages }
         var zoomOut by remember { mutableStateOf(false) }
         val state = rememberPageCurlState(
             max = pages.size,

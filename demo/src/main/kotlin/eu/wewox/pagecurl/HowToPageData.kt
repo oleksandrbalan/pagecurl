@@ -112,5 +112,28 @@ data class HowToPageData(
                 "That is the last page, you cannot go further \uD83D\uDE09",
             )
         )
+
+        val backPageHowToPages = listOf(
+            HowToPageData(
+                "Back-page configuration",
+                "This example demonstrates how back-page can be configured.",
+            ),
+            HowToPageData(
+                "Custom tap",
+                "This example has a custom tap configured to show a settings row below. Try it and tap somewhere near the center of the page. Tap on the PageCurl to zoom back in.",
+            ),
+            HowToPageData(
+                "Settings",
+                "The alpha slider configures how much content is visible on the back page. Bigger value means that page is more see-through.",
+            ),
+            HowToPageData(
+                "Settings",
+                "The color value defines a color of the back-page. It is more visible is the alpha value is low.",
+            ),
+            HowToPageData(
+                "End",
+                "That is the last page, you cannot go further \uD83D\uDE09",
+            )
+        )
     }
 }
