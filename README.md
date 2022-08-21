@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/oleksandrbalan/pagecurl.svg)](https://jitpack.io/#oleksandrbalan/pagecurl)
+
 # Page Curl
 
 Page Curl library for Jetpack Compose.
