@@ -11,6 +11,7 @@ plugins {
     id "org.jetbrains.kotlin.android" version "1.7.10" apply false
     id "io.gitlab.arturbosch.detekt" version "1.21.0"
     id "com.diffplug.spotless" version "6.5.1"
+    id "com.vanniktech.maven.publish" version "0.21.0"
 }
 
 configure(subprojects) {
