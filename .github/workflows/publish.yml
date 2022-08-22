@@ -31,4 +31,4 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: publish
-        run: ./gradlew publish --no-daemon --no-parallel
+        run: ./gradlew publish --no-daemon --no-parallel --stacktrace --info
