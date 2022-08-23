@@ -17,6 +17,7 @@ jobs:
   publish:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+    environment: default
     env: 
       ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
       ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
