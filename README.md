@@ -37,7 +37,7 @@ pluginManagement {
 Check latest version on the [releases page](https://github.com/oleksandrbalan/pagecurl/releases).
 ```
 dependencies {
-    implementation 'com.github.oleksandrbalan:pagecurl:$version'
+    implementation 'io.github.oleksandrbalan:pagecurl:$version'
 }
 ```
 
