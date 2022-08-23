@@ -1,4 +1,4 @@
-[![](https://jitpack.io/v/oleksandrbalan/pagecurl.svg)](https://jitpack.io/#oleksandrbalan/pagecurl)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.oleksandrbalan/pagecurl.svg?label=Maven%20Central)](https://search.maven.org/artifact/io.github.oleksandrbalan/pagecurl)
 
 # Page Curl
 
@@ -12,13 +12,23 @@ This library allows to create an effect of turning pages, which can be used in b
 
 ### Get a dependency
 
-**Step 1.** Add the JitPack repository to your build file.
-Add it in your root build.gradle at the end of repositories:
+**Step 1.** Add the MavenCentral repository to your build file.
+Add it in your root `build.gradle` at the end of repositories:
 ```
 allprojects {
     repositories {
         ...
-        maven { url 'https://jitpack.io' }
+        mavenCentral()
+    }
+}
+```
+
+Or in `settings.gradle`:
+```
+pluginManagement {
+    repositories {
+        ...
+        mavenCentral()
     }
 }
 ```
