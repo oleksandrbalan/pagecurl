@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk compile_sdk_version
 
     defaultConfig {
         applicationId "eu.wewox.pagecurl"
-        minSdk 24
-        targetSdk 32
+        minSdk min_sdk_version
+        targetSdk target_sdk_version
         versionCode 1
         versionName "1.0"
 

@@ -10,6 +10,7 @@
 /.idea/assetWizardSettings.xml
 /.idea/misc.xml
 /.idea/deploymentTargetDropDown.xml
+/.idea/kotlinc.xml
 .DS_Store
 /build
 /captures
