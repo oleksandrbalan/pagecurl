@@ -34,7 +34,7 @@ internal fun SettingsPopup(
     ) {
         Card(
             shape = RoundedCornerShape(24.dp),
-            elevation = 16.dp,
+            elevation = 8.dp,
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
