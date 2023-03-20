@@ -52,14 +52,18 @@ fun ZoomOutLayout(
         bottom = bottom,
         modifier = modifier,
     ) {
-        // Animate radius and elevation with the same value, because we not :)
+        // Animate radius and elevation with the same value, because why not :)
         val cornersAndElevation by animateDpAsState(if (zoomOut) 16.dp else 0.dp)
 
-        Card(
-            shape = RoundedCornerShape(cornersAndElevation),
-            elevation = cornersAndElevation,
-            content = pageCurl,
-        )
+        if (cornersAndElevation != 0.dp) {
+            Card(
+                shape = RoundedCornerShape(cornersAndElevation),
+                elevation = cornersAndElevation,
+                content = pageCurl,
+            )
+        } else {
+            pageCurl()
+        }
     }
 }
 

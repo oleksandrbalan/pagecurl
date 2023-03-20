@@ -50,7 +50,9 @@ android {
 dependencies {
     implementation(project(":pagecurl"))
 
-    implementation("androidx.compose.ui:ui:$compose_version")
-    implementation("androidx.compose.material:material:$compose_version")
-    implementation("androidx.activity:activity-compose:$activity")
+    implementation(platform("androidx.compose:compose-bom:$compose_bom_version"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material:material")
+    implementation("androidx.activity:activity-compose:$activity_version")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanist_version")
 }
