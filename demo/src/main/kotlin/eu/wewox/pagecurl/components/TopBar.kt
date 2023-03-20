@@ -1,6 +1,7 @@
 package eu.wewox.pagecurl.components
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -19,5 +20,6 @@ fun TopBar(title: String) {
         style = MaterialTheme.typography.h4,
         modifier = Modifier
             .padding(SpacingMedium)
+            .statusBarsPadding()
     )
 }
