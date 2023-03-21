@@ -82,6 +82,7 @@ private class BackendService {
 
 private class ItemPagingSource(private val backend: BackendService) : PagingSource<Int, Item>() {
 
+    @Suppress("TooGenericExceptionCaught") // It is only for demo purpose
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Item> =
         try {
             val nextPageNumber = params.key ?: 0
