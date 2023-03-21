@@ -55,4 +55,6 @@ dependencies {
     implementation("androidx.compose.material:material")
     implementation("androidx.activity:activity-compose:$activity_version")
     implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanist_version")
+    implementation("androidx.paging:paging-runtime:$paging_version")
+    implementation("androidx.paging:paging-compose:$paging_compose_version")
 }

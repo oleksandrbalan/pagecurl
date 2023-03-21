@@ -14,6 +14,10 @@ enum class Example(
         "Simple Page Curl",
         "Basic PageCurl usage"
     ),
+    PagingPageCurl(
+        "PageCurl with lazy paging",
+        "Example how component could be used with paging implementation"
+    ),
     SettingsPageCurl(
         "Page Curl With Settings",
         "Showcases how individual interactions can be toggled on / off"

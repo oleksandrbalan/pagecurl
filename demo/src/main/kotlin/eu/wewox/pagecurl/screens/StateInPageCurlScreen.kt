@@ -45,7 +45,6 @@ fun StateInPageCurlScreen() {
         val pages = remember { HowToPageData.stateHowToPages }
         var zoomOut by remember { mutableStateOf(false) }
         val state = rememberPageCurlState(
-            max = pages.size,
             config = rememberPageCurlConfig(
                 onCustomTap = { size, position ->
                     // When PageCurl is zoomed out then zoom back in
@@ -66,9 +65,12 @@ fun StateInPageCurlScreen() {
         ZoomOutLayout(
             zoomOut = zoomOut,
             config = state.config,
-            bottom = { SettingsRow(state) },
+            bottom = { SettingsRow(pages.size, state) },
         ) {
-            PageCurl(state = state) { index ->
+            PageCurl(
+                count = pages.size,
+                state = state,
+            ) { index ->
                 HowToPage(index, pages[index])
             }
         }
@@ -77,6 +79,7 @@ fun StateInPageCurlScreen() {
 
 @Composable
 private fun SettingsRow(
+    max: Int,
     state: PageCurlState,
     modifier: Modifier = Modifier
 ) {
@@ -92,7 +95,7 @@ private fun SettingsRow(
         }
 
         SettingsRowButton("Snap to last") {
-            state.snapTo(state.max)
+            state.snapTo(max)
         }
 
         SettingsRowButton("Snap forward") {

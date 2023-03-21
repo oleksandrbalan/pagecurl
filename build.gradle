@@ -8,6 +8,8 @@ buildscript {
         compose_compiler_version = "1.4.2"
         accompanist_version = "0.28.0"
         activity_version = "1.6.1"
+        paging_version = "3.1.1"
+        paging_compose_version = "1.0.0-alpha18"
     }
 }
 plugins {

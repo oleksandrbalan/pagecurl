@@ -46,13 +46,12 @@ dependencies {
 ### Use in Composable
 
 The `PageCurl` has 2 mandatory arguments:
-* **state** - The state of the PageCurl. Use it to programmatically change the current page or observe changes, and to configure shadow, back-page and interactions.
-* **content** -  The content lambda to provide the page composable. Receives the page number.
+* **count** - The count of pages.
+* **content** - The content lambda to provide the page composable. Receives the page number.
 
 ```
 val pages = listOf("One", "Two", "Three")
-val state = rememberPageCurlState(max = pages.size)
-PageCurl(state = state) { index ->
+PageCurl(count = pages.size) { index ->
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -63,6 +62,36 @@ PageCurl(state = state) { index ->
             text = pages[index],
             style = MaterialTheme.typography.h1,
         )
+    }
+}
+```
+
+Optionally `state` could be provided to observe and manage PageCurl state.
+* **state** - The state of the PageCurl. Use it to programmatically change the current page or observe changes, and to configure shadow, back-page and interactions.
+```
+Column {
+    val scope = rememberCoroutineScope()
+    val state = rememberPageCurlState()
+    Button(onClick = { scope.launch { state.next() } }) {
+        Text(text = "Next")
+    }
+
+    val pages = listOf("One", "Two", "Three")
+    PageCurl(
+        count = pages.size,
+        state = state,
+    ) { index ->
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .background(MaterialTheme.colors.background)
+                .fillMaxSize()
+        ) {
+            Text(
+                text = pages[index],
+                style = MaterialTheme.typography.h1,
+            )
+        }
     }
 }
 ```

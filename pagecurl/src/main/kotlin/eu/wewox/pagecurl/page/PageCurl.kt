@@ -12,6 +12,7 @@ import eu.wewox.pagecurl.ExperimentalPageCurlApi
 /**
  * Shows the pages which may be turned by drag or tap gestures.
  *
+ * @param count The count of pages.
  * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
  * @param modifier The modifier for this composable.
  * @param content The content lambda to provide the page composable. Receives the page number.
@@ -19,14 +20,16 @@ import eu.wewox.pagecurl.ExperimentalPageCurlApi
 @ExperimentalPageCurlApi
 @Composable
 public fun PageCurl(
-    state: PageCurlState,
+    count: Int,
     modifier: Modifier = Modifier,
+    state: PageCurlState = rememberPageCurlState(),
     content: @Composable (Int) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val updatedCurrent by rememberUpdatedState(state.current)
 
     BoxWithConstraints(modifier) {
+        state.max = count
         state.setup(constraints)
 
         val internalState by rememberUpdatedState(state.internalState ?: return@BoxWithConstraints)
@@ -81,4 +84,27 @@ public fun PageCurl(
             }
         }
     }
+}
+
+/**
+ * Shows the pages which may be turned by drag or tap gestures.
+ *
+ * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
+ * @param modifier The modifier for this composable.
+ * @param content The content lambda to provide the page composable. Receives the page number.
+ */
+@ExperimentalPageCurlApi
+@Composable
+@Deprecated("Specify 'max' as 'count' in PageCurl composable.")
+public fun PageCurl(
+    state: PageCurlState,
+    modifier: Modifier = Modifier,
+    content: @Composable (Int) -> Unit
+) {
+    PageCurl(
+        count = state.max,
+        state = state,
+        modifier = modifier,
+        content = content,
+    )
 }

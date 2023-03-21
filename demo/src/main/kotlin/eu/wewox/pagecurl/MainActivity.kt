@@ -31,6 +31,7 @@ import androidx.core.view.WindowCompat
 import eu.wewox.pagecurl.components.TopBar
 import eu.wewox.pagecurl.screens.BackPagePageCurlScreen
 import eu.wewox.pagecurl.screens.InteractionConfigInPageCurlScreen
+import eu.wewox.pagecurl.screens.PagingPageCurlScreen
 import eu.wewox.pagecurl.screens.SettingsPageCurlScreen
 import eu.wewox.pagecurl.screens.ShadowInPageCurlScreen
 import eu.wewox.pagecurl.screens.SimplePageCurlScreen
@@ -61,6 +62,7 @@ class MainActivity : ComponentActivity() {
                         when (selected) {
                             null -> RootScreen(onExampleClick = { example = it })
                             Example.SimplePageCurl -> SimplePageCurlScreen()
+                            Example.PagingPageCurl -> PagingPageCurlScreen()
                             Example.SettingsPageCurl -> SettingsPageCurlScreen()
                             Example.StateInPageCurl -> StateInPageCurlScreen()
                             Example.InteractionConfigInPageCurl -> InteractionConfigInPageCurlScreen()

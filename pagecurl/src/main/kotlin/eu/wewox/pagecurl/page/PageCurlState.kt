@@ -27,6 +27,37 @@ import kotlinx.coroutines.withContext
 /**
  * Remembers the [PageCurlState].
  *
+ * @param initialCurrent The initial current page.
+ * @param config The configuration for PageCurl.
+ * @return The remembered [PageCurlState].
+ */
+@ExperimentalPageCurlApi
+@Composable
+public fun rememberPageCurlState(
+    initialCurrent: Int = 0,
+    config: PageCurlConfig = rememberPageCurlConfig()
+): PageCurlState =
+    rememberSaveable(
+        initialCurrent,
+        saver = Saver(
+            save = { it.current },
+            restore = {
+                PageCurlState(
+                    initialCurrent = it,
+                    config = config,
+                )
+            }
+        )
+    ) {
+        PageCurlState(
+            initialCurrent = initialCurrent,
+            config = config,
+        )
+    }
+
+/**
+ * Remembers the [PageCurlState].
+ *
  * @param max The max number of pages.
  * @param initialCurrent The initial current page.
  * @param config The configuration for PageCurl.
@@ -34,6 +65,7 @@ import kotlinx.coroutines.withContext
  */
 @ExperimentalPageCurlApi
 @Composable
+@Deprecated("Specify 'max' as 'count' in PageCurl composable.")
 public fun rememberPageCurlState(
     max: Int,
     initialCurrent: Int = 0,
@@ -45,16 +77,16 @@ public fun rememberPageCurlState(
             save = { it.current },
             restore = {
                 PageCurlState(
-                    max = max,
                     initialCurrent = it,
+                    initialMax = max,
                     config = config,
                 )
             }
         )
     ) {
         PageCurlState(
-            max = max,
             initialCurrent = initialCurrent,
+            initialMax = max,
             config = config,
         )
     }
@@ -62,14 +94,14 @@ public fun rememberPageCurlState(
 /**
  * The state of the PageCurl.
  *
- * @property max The max number of pages.
  * @property config The configuration for PageCurl.
+ * @param initialMax The initial max number of pages.
  * @param initialCurrent The initial current page.
  */
 @ExperimentalPageCurlApi
 public class PageCurlState(
-    public val max: Int,
     public val config: PageCurlConfig,
+    initialMax: Int = 0,
     initialCurrent: Int = 0,
 ) {
     /**
@@ -83,6 +115,8 @@ public class PageCurlState(
      * When going forward it changes from 0 to 1, when going backward it is going from 0 to -1.
      */
     public val progress: Float get() = internalState?.progress ?: 0f
+
+    internal var max: Int = initialMax
 
     internal var internalState: InternalState? by mutableStateOf(null)
 
