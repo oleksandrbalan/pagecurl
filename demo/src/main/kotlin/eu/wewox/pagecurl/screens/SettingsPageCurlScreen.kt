@@ -34,7 +34,6 @@ fun SettingsPageCurlScreen() {
         var showPopup by rememberSaveable { mutableStateOf(false) }
 
         val state = rememberPageCurlState(
-            max = pages.size,
             config = rememberPageCurlConfig(
                 onCustomTap = { size, position ->
                     // Detect tap somewhere in the center with 64 radius and show popup
@@ -48,7 +47,10 @@ fun SettingsPageCurlScreen() {
             )
         )
 
-        PageCurl(state = state) { index ->
+        PageCurl(
+            count = pages.size,
+            state = state,
+        ) { index ->
             HowToPage(index, pages[index])
         }
 

@@ -40,7 +40,6 @@ fun ShadowInPageCurlScreen() {
         val pages = remember { HowToPageData.shadowHowToPages }
         var zoomOut by remember { mutableStateOf(false) }
         val state = rememberPageCurlState(
-            max = pages.size,
             config = rememberPageCurlConfig(
                 onCustomTap = { size, position ->
                     // When PageCurl is zoomed out then zoom back in
@@ -63,7 +62,10 @@ fun ShadowInPageCurlScreen() {
             config = state.config,
             bottom = { SettingsRow(state.config) },
         ) {
-            PageCurl(state = state) { index ->
+            PageCurl(
+                count = pages.size,
+                state = state,
+            ) { index ->
                 HowToPage(index, pages[index])
             }
         }

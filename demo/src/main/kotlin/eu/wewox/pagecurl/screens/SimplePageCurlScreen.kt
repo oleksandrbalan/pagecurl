@@ -11,19 +11,17 @@ import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.HowToPageData
 import eu.wewox.pagecurl.components.HowToPage
 import eu.wewox.pagecurl.page.PageCurl
-import eu.wewox.pagecurl.page.rememberPageCurlState
 
 /**
- * Page Curl With Settings.
- * Showcases how individual interactions can be toggled on / off.
+ * Simple Page Curl.
+ * Basic PageCurl usage.
  */
 @Composable
 fun SimplePageCurlScreen() {
     Box(Modifier.fillMaxSize()) {
         val pages = remember { HowToPageData.simpleHowToPages }
-        val state = rememberPageCurlState(max = pages.size)
 
-        PageCurl(state = state) { index ->
+        PageCurl(count = pages.size) { index ->
             HowToPage(index, pages[index])
         }
     }
