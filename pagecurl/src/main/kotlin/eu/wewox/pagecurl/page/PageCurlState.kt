@@ -117,10 +117,17 @@ public class PageCurlState(
     public val progress: Float get() = internalState?.progress ?: 0f
 
     internal var max: Int = initialMax
+        private set
 
     internal var internalState: InternalState? by mutableStateOf(null)
+        private set
 
-    internal fun setup(constraints: Constraints) {
+    internal fun setup(count: Int, constraints: Constraints) {
+        max = count
+        if (current >= count) {
+            current = count - 1
+        }
+
         if (internalState?.constraints == constraints) {
             return
         }

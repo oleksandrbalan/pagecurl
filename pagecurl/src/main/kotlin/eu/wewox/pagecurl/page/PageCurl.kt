@@ -26,12 +26,11 @@ public fun PageCurl(
     content: @Composable (Int) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val updatedCurrent by rememberUpdatedState(state.current)
 
     BoxWithConstraints(modifier) {
-        state.max = count
-        state.setup(constraints)
+        state.setup(count, constraints)
 
+        val updatedCurrent by rememberUpdatedState(state.current)
         val internalState by rememberUpdatedState(state.internalState ?: return@BoxWithConstraints)
 
         val config by rememberUpdatedState(state.config)
