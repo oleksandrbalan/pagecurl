@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.oleksandrbalan/pagecurl.svg?label=Maven%20Central)](https://search.maven.org/artifact/io.github.oleksandrbalan/pagecurl)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.oleksandrbalan/pagecurl.svg?label=Maven%20Central)](https://mvnrepository.com/artifact/io.github.oleksandrbalan/pagecurl)
 
 <img align="right" src="https://user-images.githubusercontent.com/20944869/200791917-a2436c9a-d062-4c14-9c71-c94fe8703061.png">
 
