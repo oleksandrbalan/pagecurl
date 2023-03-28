@@ -77,13 +77,15 @@ public fun PageCurl(
                 }
 
                 if (updatedCurrent < state.max) {
-                    Box(Modifier.drawCurl(config, internalState.forward.value.top, internalState.forward.value.bottom)) {
+                    val forward = internalState.forward.value
+                    Box(Modifier.drawCurl(config, forward.top, forward.bottom)) {
                         content(updatedCurrent)
                     }
                 }
 
                 if (updatedCurrent > 0) {
-                    Box(Modifier.drawCurl(config, internalState.backward.value.top, internalState.backward.value.bottom)) {
+                    val backward = internalState.backward.value
+                    Box(Modifier.drawCurl(config, backward.top, backward.bottom)) {
                         content(updatedCurrent - 1)
                     }
                 }
