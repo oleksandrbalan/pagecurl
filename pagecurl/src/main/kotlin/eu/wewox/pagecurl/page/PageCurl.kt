@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -69,19 +70,24 @@ public fun PageCurl(
                     onTapBackward = state::prev,
                 )
         ) {
-            if (updatedCurrent + 1 < state.max) {
-                content(updatedCurrent + 1)
-            }
-
-            if (updatedCurrent < state.max) {
-                Box(Modifier.drawCurl(config, internalState.forward.value.top, internalState.forward.value.bottom)) {
-                    content(updatedCurrent)
+            // Wrap in key to synchronize state updates
+            key(updatedCurrent, internalState.forward.value, internalState.backward.value) {
+                if (updatedCurrent + 1 < state.max) {
+                    content(updatedCurrent + 1)
                 }
-            }
 
-            if (updatedCurrent > 0) {
-                Box(Modifier.drawCurl(config, internalState.backward.value.top, internalState.backward.value.bottom)) {
-                    content(updatedCurrent - 1)
+                if (updatedCurrent < state.max) {
+                    val forward = internalState.forward.value
+                    Box(Modifier.drawCurl(config, forward.top, forward.bottom)) {
+                        content(updatedCurrent)
+                    }
+                }
+
+                if (updatedCurrent > 0) {
+                    val backward = internalState.backward.value
+                    Box(Modifier.drawCurl(config, backward.top, backward.bottom)) {
+                        content(updatedCurrent - 1)
+                    }
                 }
             }
         }
