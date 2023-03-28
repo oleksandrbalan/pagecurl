@@ -125,7 +125,7 @@ public class PageCurlState(
     internal fun setup(count: Int, constraints: Constraints) {
         max = count
         if (current >= count) {
-            current = count - 1
+            current = (count - 1).coerceAtLeast(0)
         }
 
         if (internalState?.constraints == constraints) {

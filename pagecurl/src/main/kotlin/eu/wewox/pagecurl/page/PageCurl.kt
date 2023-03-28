@@ -4,8 +4,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
 
@@ -83,6 +86,44 @@ public fun PageCurl(
             }
         }
     }
+}
+
+/**
+ * Shows the pages which may be turned by drag or tap gestures.
+ *
+ * @param count The count of pages.
+ * @param key The lambda to provide stable key for each item. Useful when adding and removing items before current page.
+ * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
+ * @param modifier The modifier for this composable.
+ * @param content The content lambda to provide the page composable. Receives the page number.
+ */
+@ExperimentalPageCurlApi
+@Composable
+public fun PageCurl(
+    count: Int,
+    key: (Int) -> Any,
+    modifier: Modifier = Modifier,
+    state: PageCurlState = rememberPageCurlState(),
+    content: @Composable (Int) -> Unit
+) {
+    var lastKey by remember(state.current) { mutableStateOf(if (count > 0) key(state.current) else null) }
+
+    remember(count) {
+        val newKey = if (count > 0) key(state.current) else null
+        if (newKey != lastKey) {
+            val index = List(count, key).indexOf(lastKey).coerceIn(0, count - 1)
+            lastKey = newKey
+            state.current = index
+        }
+        count
+    }
+
+    PageCurl(
+        count = count,
+        state = state,
+        content = content,
+        modifier = modifier,
+    )
 }
 
 /**

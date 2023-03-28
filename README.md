@@ -96,6 +96,34 @@ Column {
 }
 ```
 
+Optionally `key` lambda could be provided with stable key for each item. PageCurl with keys for each page will correctly preserve a current position when items are added or removed.
+* **key** - The lambda to provide stable key for each item. Useful when adding and removing items before current page.
+```
+Column {
+    var pages by remember { mutableStateOf(listOf("Four", "Five", "Six")) }
+    Button(onClick = { pages = listOf("One", "Two", "Three") + pages }) {
+        Text(text = "Prepend new pages")
+    }
+
+    PageCurl(
+        count = pages.size,
+        key = { pages[it].hashCode() },
+    ) { index ->
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .background(MaterialTheme.colors.background)
+                .fillMaxSize()
+        ) {
+            Text(
+                text = pages[index],
+                style = MaterialTheme.typography.h1,
+            )
+        }
+    }
+}
+```
+
 See Demo application and [examples](demo/src/main/kotlin/eu/wewox/pagecurl/screens) for more usage examples.
 
 https://user-images.githubusercontent.com/20944869/185782671-2861c2ed-c033-4318-bf12-1d8db74fc8b5.mp4
