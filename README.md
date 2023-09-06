@@ -15,8 +15,8 @@ This library allows to create an effect of turning pages, which can be used in b
 ### Get a dependency
 
 **Step 1.** Add the MavenCentral repository to your build file.
-Add it in your root `build.gradle` at the end of repositories:
-```
+Add it in your root `build.gradle.kts` at the end of repositories:
+```kotlin
 allprojects {
     repositories {
         ...
@@ -25,8 +25,8 @@ allprojects {
 }
 ```
 
-Or in `settings.gradle`:
-```
+Or in `settings.gradle.kts`:
+```kotlin
 pluginManagement {
     repositories {
         ...
@@ -37,9 +37,9 @@ pluginManagement {
 
 **Step 2.** Add the dependency.
 Check latest version on the [releases page](https://github.com/oleksandrbalan/pagecurl/releases).
-```
+```kotlin
 dependencies {
-    implementation 'io.github.oleksandrbalan:pagecurl:$version'
+    implementation("io.github.oleksandrbalan:pagecurl:$version")
 }
 ```
 
