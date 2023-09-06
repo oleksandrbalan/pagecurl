@@ -33,30 +33,30 @@ fun SettingsPageCurlScreen() {
 
         var showPopup by rememberSaveable { mutableStateOf(false) }
 
-        val state = rememberPageCurlState(
-            config = rememberPageCurlConfig(
-                onCustomTap = { size, position ->
-                    // Detect tap somewhere in the center with 64 radius and show popup
-                    if ((position - size.center.toOffset()).getDistance() < 64.dp.toPx()) {
-                        showPopup = true
-                        true
-                    } else {
-                        false
-                    }
+        val state = rememberPageCurlState()
+        val config = rememberPageCurlConfig(
+            onCustomTap = { size, position ->
+                // Detect tap somewhere in the center with 64 radius and show popup
+                if ((position - size.center.toOffset()).getDistance() < 64.dp.toPx()) {
+                    showPopup = true
+                    true
+                } else {
+                    false
                 }
-            )
+            }
         )
 
         PageCurl(
             count = pages.size,
             state = state,
+            config = config,
         ) { index ->
             HowToPage(index, pages[index])
         }
 
         if (showPopup) {
             SettingsPopup(
-                config = state.config,
+                config = config,
                 onDismiss = {
                     showPopup = false
                 }
