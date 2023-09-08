@@ -28,30 +28,52 @@ import kotlinx.coroutines.withContext
  * Remembers the [PageCurlState].
  *
  * @param initialCurrent The initial current page.
- * @param config The configuration for PageCurl.
  * @return The remembered [PageCurlState].
  */
 @ExperimentalPageCurlApi
 @Composable
 public fun rememberPageCurlState(
     initialCurrent: Int = 0,
-    config: PageCurlConfig = rememberPageCurlConfig()
 ): PageCurlState =
     rememberSaveable(
         initialCurrent,
         saver = Saver(
             save = { it.current },
-            restore = {
-                PageCurlState(
-                    initialCurrent = it,
-                    config = config,
-                )
-            }
+            restore = { PageCurlState(initialCurrent = it) }
         )
     ) {
         PageCurlState(
             initialCurrent = initialCurrent,
-            config = config,
+        )
+    }
+
+/**
+ * Remembers the [PageCurlState].
+ *
+ * @param initialCurrent The initial current page.
+ * @param config The configuration for PageCurl.
+ * @return The remembered [PageCurlState].
+ */
+@ExperimentalPageCurlApi
+@Composable
+@Deprecated(
+    message = "Specify 'config' as 'config' in PageCurl composable.",
+    level = DeprecationLevel.ERROR,
+)
+@Suppress("UnusedPrivateMember")
+public fun rememberPageCurlState(
+    initialCurrent: Int = 0,
+    config: PageCurlConfig,
+): PageCurlState =
+    rememberSaveable(
+        initialCurrent,
+        saver = Saver(
+            save = { it.current },
+            restore = { PageCurlState(initialCurrent = it) }
+        )
+    ) {
+        PageCurlState(
+            initialCurrent = initialCurrent,
         )
     }
 
@@ -65,7 +87,11 @@ public fun rememberPageCurlState(
  */
 @ExperimentalPageCurlApi
 @Composable
-@Deprecated("Specify 'max' as 'count' in PageCurl composable.")
+@Deprecated(
+    message = "Specify 'max' as 'count' in PageCurl composable and 'config' as 'config' in PageCurl composable.",
+    level = DeprecationLevel.ERROR,
+)
+@Suppress("UnusedPrivateMember")
 public fun rememberPageCurlState(
     max: Int,
     initialCurrent: Int = 0,
@@ -79,7 +105,6 @@ public fun rememberPageCurlState(
                 PageCurlState(
                     initialCurrent = it,
                     initialMax = max,
-                    config = config,
                 )
             }
         )
@@ -87,20 +112,17 @@ public fun rememberPageCurlState(
         PageCurlState(
             initialCurrent = initialCurrent,
             initialMax = max,
-            config = config,
         )
     }
 
 /**
  * The state of the PageCurl.
  *
- * @property config The configuration for PageCurl.
  * @param initialMax The initial max number of pages.
  * @param initialCurrent The initial current page.
  */
 @ExperimentalPageCurlApi
 public class PageCurlState(
-    public val config: PageCurlConfig,
     initialMax: Int = 0,
     initialCurrent: Int = 0,
 ) {

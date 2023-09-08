@@ -12,13 +12,16 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
+import eu.wewox.pagecurl.config.PageCurlConfig
+import eu.wewox.pagecurl.config.rememberPageCurlConfig
 
 /**
  * Shows the pages which may be turned by drag or tap gestures.
  *
  * @param count The count of pages.
- * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
  * @param modifier The modifier for this composable.
+ * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
+ * @param config The configuration for PageCurl.
  * @param content The content lambda to provide the page composable. Receives the page number.
  */
 @ExperimentalPageCurlApi
@@ -27,6 +30,7 @@ public fun PageCurl(
     count: Int,
     modifier: Modifier = Modifier,
     state: PageCurlState = rememberPageCurlState(),
+    config: PageCurlConfig = rememberPageCurlConfig(),
     content: @Composable (Int) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -37,13 +41,13 @@ public fun PageCurl(
         val updatedCurrent by rememberUpdatedState(state.current)
         val internalState by rememberUpdatedState(state.internalState ?: return@BoxWithConstraints)
 
-        val config by rememberUpdatedState(state.config)
+        val config by rememberUpdatedState(config)
 
         Box(
             Modifier
                 .curlGesture(
                     state = internalState,
-                    enabled = state.config.dragForwardEnabled && updatedCurrent < state.max - 1,
+                    enabled = config.dragForwardEnabled && updatedCurrent < state.max - 1,
                     scope = scope,
                     targetStart = config.dragForwardInteraction.start,
                     targetEnd = config.dragForwardInteraction.end,
@@ -54,7 +58,7 @@ public fun PageCurl(
                 )
                 .curlGesture(
                     state = internalState,
-                    enabled = state.config.dragBackwardEnabled && updatedCurrent > 0,
+                    enabled = config.dragBackwardEnabled && updatedCurrent > 0,
                     scope = scope,
                     targetStart = config.dragBackwardInteraction.start,
                     targetEnd = config.dragBackwardInteraction.end,

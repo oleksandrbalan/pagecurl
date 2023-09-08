@@ -47,32 +47,32 @@ fun InteractionConfigInPageCurlScreen() {
     Box(Modifier.fillMaxSize()) {
         val pages = remember { HowToPageData.interactionSettingsHowToPages }
         var zoomOut by remember { mutableStateOf(false) }
-        val state = rememberPageCurlState(
-            config = rememberPageCurlConfig(
-                onCustomTap = { size, position ->
-                    // When PageCurl is zoomed out then zoom back in
-                    // Else detect tap somewhere in the center with 64 radius and zoom out a PageCurl
-                    if (zoomOut) {
-                        zoomOut = false
-                        true
-                    } else if ((position - size.center.toOffset()).getDistance() < 64.dp.toPx()) {
-                        zoomOut = true
-                        true
-                    } else {
-                        false
-                    }
+        val state = rememberPageCurlState()
+        val config = rememberPageCurlConfig(
+            onCustomTap = { size, position ->
+                // When PageCurl is zoomed out then zoom back in
+                // Else detect tap somewhere in the center with 64 radius and zoom out a PageCurl
+                if (zoomOut) {
+                    zoomOut = false
+                    true
+                } else if ((position - size.center.toOffset()).getDistance() < 64.dp.toPx()) {
+                    zoomOut = true
+                    true
+                } else {
+                    false
                 }
-            )
+            }
         )
 
         ZoomOutLayout(
             zoomOut = zoomOut,
-            config = state.config,
-            bottom = { SettingsRow(state.config) },
+            config = config,
+            bottom = { SettingsRow(config) },
         ) {
             PageCurl(
                 count = pages.size,
                 state = state,
+                config = config,
             ) { index ->
                 HowToPage(index, pages[index])
             }
