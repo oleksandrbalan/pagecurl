@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +34,7 @@ fun HowToPage(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(SpacingMedium, Alignment.CenterVertically),
@@ -44,24 +44,24 @@ fun HowToPage(
         ) {
             Text(
                 text = page.title,
-                style = MaterialTheme.typography.h4,
+                style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Text(
                 text = page.message,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
         }
         Text(
             text = index.toString(),
-            color = MaterialTheme.colors.background,
+            color = MaterialTheme.colorScheme.background,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .background(MaterialTheme.colors.onBackground, RoundedCornerShape(topStartPercent = 100))
+                .background(MaterialTheme.colorScheme.onBackground, RoundedCornerShape(topStartPercent = 100))
                 .padding(SpacingMedium)
         )
     }
