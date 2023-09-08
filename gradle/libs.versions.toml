@@ -3,7 +3,7 @@ sdk-compile = "34"
 sdk-min = "21"
 sdk-target = "33"
 
-compose-bom = "2023.08.00"
+compose-bom = "2023.09.00"
 compose-compiler = "1.5.3"
 activity-compose = "1.8.0-beta01"
 paging = "3.2.1"
