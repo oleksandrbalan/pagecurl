@@ -114,6 +114,7 @@ public fun PageCurl(
     key: (Int) -> Any,
     modifier: Modifier = Modifier,
     state: PageCurlState = rememberPageCurlState(),
+    config: PageCurlConfig = rememberPageCurlConfig(),
     content: @Composable (Int) -> Unit
 ) {
     var lastKey by remember(state.current) { mutableStateOf(if (count > 0) key(state.current) else null) }
@@ -131,6 +132,7 @@ public fun PageCurl(
     PageCurl(
         count = count,
         state = state,
+        config = config,
         content = content,
         modifier = modifier,
     )
