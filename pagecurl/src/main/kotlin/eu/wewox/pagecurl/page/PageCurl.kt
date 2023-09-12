@@ -103,8 +103,9 @@ public fun PageCurl(
  *
  * @param count The count of pages.
  * @param key The lambda to provide stable key for each item. Useful when adding and removing items before current page.
- * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
  * @param modifier The modifier for this composable.
+ * @param state The state of the PageCurl. Use this to programmatically change the current page or observe changes.
+ * @param config The configuration for PageCurl.
  * @param content The content lambda to provide the page composable. Receives the page number.
  */
 @ExperimentalPageCurlApi
