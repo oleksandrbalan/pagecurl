@@ -27,7 +27,7 @@ allprojects {
 
 Or in `settings.gradle.kts`:
 ```kotlin
-pluginManagement {
+dependencyResolutionManagement {
     repositories {
         ...
         mavenCentral()
