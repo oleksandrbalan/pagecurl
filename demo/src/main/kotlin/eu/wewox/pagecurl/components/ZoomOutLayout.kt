@@ -20,12 +20,14 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.config.PageCurlConfig
+import kotlin.math.max
 
 /**
- * Layout which could be zoomed out and zoomed in to show / hide the [bottom] bar.
+ * Layout which could be zoomed out and zoomed in to show / hide the [bottom] and [top] bars.
  *
  * @param zoomOut True when layout is zoomed out.
  * @param config The [PageCurlConfig] to turn off interactions in the page curl.
+ * @param top The content of the top bar.
  * @param bottom The content of the bottom bar.
  * @param modifier The modifier for this composable.
  * @param pageCurl The content where PageCurl should be placed.
@@ -36,6 +38,7 @@ fun ZoomOutLayout(
     config: PageCurlConfig,
     bottom: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    top: @Composable () -> Unit = {},
     pageCurl: @Composable () -> Unit,
 ) {
     // Disable all state interactions when PageCurl is zoomed out
@@ -50,6 +53,7 @@ fun ZoomOutLayout(
 
     ZoomOutLayout(
         zoomOut = zoomOut,
+        top = top,
         bottom = bottom,
         modifier = modifier,
     ) {
@@ -71,6 +75,7 @@ fun ZoomOutLayout(
 @Composable
 private fun ZoomOutLayout(
     zoomOut: Boolean,
+    top: @Composable () -> Unit,
     bottom: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
@@ -79,27 +84,23 @@ private fun ZoomOutLayout(
         modifier = modifier,
         content = {
             content()
-            Box {
-                AnimatedVisibility(
-                    visible = zoomOut,
-                    enter = expandIn(expandFrom = Alignment.Center, initialSize = { IntSize(it.width, 0) }),
-                    exit = shrinkOut(shrinkTowards = Alignment.Center, targetSize = { IntSize(it.width, 0) })
-                ) {
-                    bottom()
-                }
-            }
+            ZoomOutLayoutBar(visible = zoomOut, content = top)
+            ZoomOutLayoutBar(visible = zoomOut, content = bottom)
         },
         measurePolicy = { measurables, constraints ->
-            val (contentMeasurable, bottomMeasurable) = measurables
+            val (contentMeasurable, topMeasurable, bottomMeasurable) = measurables
 
+            val topPlaceable = topMeasurable.measure(constraints)
             val bottomPlaceable = bottomMeasurable.measure(constraints)
             val contentPlaceable = contentMeasurable.measure(constraints)
 
             layout(constraints.maxWidth, constraints.maxHeight) {
+                topPlaceable.place(x = 0, y = 0)
                 bottomPlaceable.place(x = 0, y = constraints.maxHeight - bottomPlaceable.height)
 
                 contentPlaceable.placeWithLayer(0, 0) {
-                    val height = constraints.maxHeight - 2 * bottomPlaceable.height
+                    val maxBarHeight = max(bottomPlaceable.height, topPlaceable.height)
+                    val height = constraints.maxHeight - 2 * maxBarHeight
                     val scale = height / contentPlaceable.height.toFloat()
                     scaleX = scale
                     scaleY = scale
@@ -107,4 +108,21 @@ private fun ZoomOutLayout(
             }
         }
     )
+}
+
+@Composable
+private fun ZoomOutLayoutBar(
+    visible: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Box(modifier = modifier) {
+        AnimatedVisibility(
+            visible = visible,
+            enter = expandIn(expandFrom = Alignment.Center, initialSize = { IntSize(it.width, 0) }),
+            exit = shrinkOut(shrinkTowards = Alignment.Center, targetSize = { IntSize(it.width, 0) })
+        ) {
+            content()
+        }
+    }
 }

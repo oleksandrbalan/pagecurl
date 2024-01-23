@@ -41,34 +41,37 @@ public fun PageCurl(
         val updatedCurrent by rememberUpdatedState(state.current)
         val internalState by rememberUpdatedState(state.internalState ?: return@BoxWithConstraints)
 
-        val config by rememberUpdatedState(config)
+        val updatedConfig by rememberUpdatedState(config)
+
+        val dragGestureModifier = when (val interaction = updatedConfig.dragInteraction) {
+            is PageCurlConfig.GestureDragInteraction ->
+                Modifier
+                    .dragGesture(
+                        dragInteraction = interaction,
+                        state = internalState,
+                        enabledForward = updatedConfig.dragForwardEnabled && updatedCurrent < state.max - 1,
+                        enabledBackward = updatedConfig.dragBackwardEnabled && updatedCurrent > 0,
+                        scope = scope,
+                        onChange = { state.current = updatedCurrent + it }
+                    )
+
+            is PageCurlConfig.StartEndDragInteraction ->
+                Modifier
+                    .dragStartEnd(
+                        dragInteraction = interaction,
+                        state = internalState,
+                        enabledForward = updatedConfig.dragForwardEnabled && updatedCurrent < state.max - 1,
+                        enabledBackward = updatedConfig.dragBackwardEnabled && updatedCurrent > 0,
+                        scope = scope,
+                        onChange = { state.current = updatedCurrent + it }
+                    )
+        }
 
         Box(
             Modifier
-                .curlGesture(
-                    state = internalState,
-                    enabled = config.dragForwardEnabled && updatedCurrent < state.max - 1,
-                    scope = scope,
-                    targetStart = config.dragForwardInteraction.start,
-                    targetEnd = config.dragForwardInteraction.end,
-                    edgeStart = internalState.rightEdge,
-                    edgeEnd = internalState.leftEdge,
-                    edge = internalState.forward,
-                    onChange = { state.current = updatedCurrent + 1 }
-                )
-                .curlGesture(
-                    state = internalState,
-                    enabled = config.dragBackwardEnabled && updatedCurrent > 0,
-                    scope = scope,
-                    targetStart = config.dragBackwardInteraction.start,
-                    targetEnd = config.dragBackwardInteraction.end,
-                    edgeStart = internalState.leftEdge,
-                    edgeEnd = internalState.rightEdge,
-                    edge = internalState.backward,
-                    onChange = { state.current = updatedCurrent - 1 }
-                )
+                .then(dragGestureModifier)
                 .tapGesture(
-                    config = config,
+                    config = updatedConfig,
                     scope = scope,
                     onTapForward = state::next,
                     onTapBackward = state::prev,
@@ -82,14 +85,14 @@ public fun PageCurl(
 
                 if (updatedCurrent < state.max) {
                     val forward = internalState.forward.value
-                    Box(Modifier.drawCurl(config, forward.top, forward.bottom)) {
+                    Box(Modifier.drawCurl(updatedConfig, forward.top, forward.bottom)) {
                         content(updatedCurrent)
                     }
                 }
 
                 if (updatedCurrent > 0) {
                     val backward = internalState.backward.value
-                    Box(Modifier.drawCurl(config, backward.top, backward.bottom)) {
+                    Box(Modifier.drawCurl(updatedConfig, backward.top, backward.bottom)) {
                         content(updatedCurrent - 1)
                     }
                 }

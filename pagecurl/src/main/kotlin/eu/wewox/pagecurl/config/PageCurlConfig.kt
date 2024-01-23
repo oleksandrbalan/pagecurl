@@ -1,4 +1,4 @@
-@file:Suppress("LongParameterList", "LongMethod")
+@file:Suppress("ComplexMethod", "LongParameterList", "LongMethod")
 
 package eu.wewox.pagecurl.config
 
@@ -26,7 +26,7 @@ import eu.wewox.pagecurl.ExperimentalPageCurlApi
  * @param backPageContentAlpha The alpha which defines how content is "seen through" the back-page. From 0 (nothing
  * is visible) to 1 (everything is visible).
  * @param shadowColor The color of the shadow. In majority of use-cases it should be set to the inverted color to the
- * content background color. Should be a solid color, see [alpha] to adjust opacity.
+ * content background color. Should be a solid color, see [shadowAlpha] to adjust opacity.
  * @param shadowAlpha The alpha of the [color].
  * @param shadowRadius Defines how big the shadow is.
  * @param shadowOffset Defines how shadow is shifted from the page. A little shift may add more realism.
@@ -35,10 +35,8 @@ import eu.wewox.pagecurl.ExperimentalPageCurlApi
  * @param tapForwardEnabled True if forward tap interaction is enabled or not.
  * @param tapBackwardEnabled True if backward tap interaction is enabled or not.
  * @param tapCustomEnabled True if custom tap interaction is enabled or not, see [onCustomTap].
- * @param dragForwardInteraction The forward drag interaction setting.
- * @param dragBackwardInteraction The backward drag interaction setting.
- * @param tapForwardInteraction The forward tap interaction setting.
- * @param tapBackwardInteraction The backward tap interaction setting.
+ * @param dragInteraction The drag interaction setting.
+ * @param tapInteraction The tap interaction setting.
  * @param onCustomTap The lambda to invoke to check if tap is handled by custom tap or not. Receives the density
  * scope, the PageCurl size and tap position. Returns true if tap is handled and false otherwise.
  */
@@ -56,15 +54,37 @@ public fun rememberPageCurlConfig(
     tapForwardEnabled: Boolean = true,
     tapBackwardEnabled: Boolean = true,
     tapCustomEnabled: Boolean = true,
-    dragForwardInteraction: PageCurlConfig.DragInteraction = PageCurlConfig.DragInteraction(rightHalf(), leftHalf()),
-    dragBackwardInteraction: PageCurlConfig.DragInteraction = PageCurlConfig.DragInteraction(leftHalf(), rightHalf()),
-    tapForwardInteraction: PageCurlConfig.TapInteraction = PageCurlConfig.TapInteraction(rightHalf()),
-    tapBackwardInteraction: PageCurlConfig.TapInteraction = PageCurlConfig.TapInteraction(leftHalf()),
+    dragInteraction: PageCurlConfig.DragInteraction = PageCurlConfig.StartEndDragInteraction(),
+    tapInteraction: PageCurlConfig.TapInteraction = PageCurlConfig.TargetTapInteraction(),
     onCustomTap: Density.(IntSize, Offset) -> Boolean = { _, _ -> false },
 ): PageCurlConfig =
     rememberSaveable(
         saver = listSaver(
             save = {
+                fun Rect.forSave(): List<Any> =
+                    listOf(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y)
+
+                fun PageCurlConfig.DragInteraction.getRectList(): List<Rect> =
+                    when (this) {
+                        is PageCurlConfig.GestureDragInteraction ->
+                            listOf(forward.target, backward.target)
+
+                        is PageCurlConfig.StartEndDragInteraction ->
+                            listOf(forward.start, forward.end, backward.start, backward.end)
+                    }
+
+                fun PageCurlConfig.TapInteraction.getRectList(): List<Rect> =
+                    when (this) {
+                        is PageCurlConfig.TargetTapInteraction ->
+                            listOf(forward.target, backward.target)
+                    }
+
+                fun PageCurlConfig.DragInteraction.forSave(): List<Any> =
+                    listOf(this::class.java) + getRectList().flatMap(Rect::forSave)
+
+                fun PageCurlConfig.TapInteraction.forSave(): List<Any> =
+                    listOf(this::class.java) + getRectList().flatMap(Rect::forSave)
+
                 listOf(
                     (it.backPageColor.value shr 32).toInt(),
                     it.backPageContentAlpha,
@@ -78,59 +98,54 @@ public fun rememberPageCurlConfig(
                     it.tapForwardEnabled,
                     it.tapBackwardEnabled,
                     it.tapCustomEnabled,
-                    it.dragForwardInteraction.start.topLeft.x,
-                    it.dragForwardInteraction.start.topLeft.y,
-                    it.dragForwardInteraction.start.bottomRight.x,
-                    it.dragForwardInteraction.start.bottomRight.y,
-                    it.dragForwardInteraction.end.topLeft.x,
-                    it.dragForwardInteraction.end.topLeft.y,
-                    it.dragForwardInteraction.end.bottomRight.x,
-                    it.dragForwardInteraction.end.bottomRight.y,
-                    it.dragBackwardInteraction.start.topLeft.x,
-                    it.dragBackwardInteraction.start.topLeft.y,
-                    it.dragBackwardInteraction.start.bottomRight.x,
-                    it.dragBackwardInteraction.start.bottomRight.y,
-                    it.dragBackwardInteraction.end.topLeft.x,
-                    it.dragBackwardInteraction.end.topLeft.y,
-                    it.dragBackwardInteraction.end.bottomRight.x,
-                    it.dragBackwardInteraction.end.bottomRight.y,
-                    it.tapForwardInteraction.target.topLeft.x,
-                    it.tapForwardInteraction.target.topLeft.y,
-                    it.tapForwardInteraction.target.bottomRight.x,
-                    it.tapForwardInteraction.target.bottomRight.y,
-                    it.tapBackwardInteraction.target.topLeft.x,
-                    it.tapBackwardInteraction.target.topLeft.y,
-                    it.tapBackwardInteraction.target.bottomRight.x,
-                    it.tapBackwardInteraction.target.bottomRight.y,
+                    *it.dragInteraction.forSave().toTypedArray(),
+                    *it.tapInteraction.forSave().toTypedArray(),
                 )
             },
             restore = {
+                val iterator = it.iterator()
+                fun Iterator<Any>.nextRect(): Rect =
+                    Rect(next() as Float, next() as Float, next() as Float, next() as Float)
+
                 PageCurlConfig(
-                    Color(it[0] as Int),
-                    it[1] as Float,
-                    Color(it[2] as Int),
-                    it[3] as Float,
-                    Dp(it[4] as Float),
-                    DpOffset(Dp(it[5] as Float), Dp(it[6] as Float)),
-                    it[7] as Boolean,
-                    it[8] as Boolean,
-                    it[9] as Boolean,
-                    it[10] as Boolean,
-                    it[11] as Boolean,
-                    PageCurlConfig.DragInteraction(
-                        Rect(it[12] as Float, it[13] as Float, it[14] as Float, it[15] as Float),
-                        Rect(it[16] as Float, it[17] as Float, it[18] as Float, it[19] as Float),
-                    ),
-                    PageCurlConfig.DragInteraction(
-                        Rect(it[20] as Float, it[21] as Float, it[22] as Float, it[23] as Float),
-                        Rect(it[24] as Float, it[25] as Float, it[26] as Float, it[27] as Float),
-                    ),
-                    PageCurlConfig.TapInteraction(
-                        Rect(it[28] as Float, it[29] as Float, it[30] as Float, it[31] as Float),
-                    ),
-                    PageCurlConfig.TapInteraction(
-                        Rect(it[32] as Float, it[33] as Float, it[34] as Float, it[35] as Float),
-                    ),
+                    Color(iterator.next() as Int),
+                    iterator.next() as Float,
+                    Color(iterator.next() as Int),
+                    iterator.next() as Float,
+                    Dp(iterator.next() as Float),
+                    DpOffset(Dp(iterator.next() as Float), Dp(iterator.next() as Float)),
+                    iterator.next() as Boolean,
+                    iterator.next() as Boolean,
+                    iterator.next() as Boolean,
+                    iterator.next() as Boolean,
+                    iterator.next() as Boolean,
+                    when (iterator.next()) {
+                        PageCurlConfig.GestureDragInteraction::class.java -> {
+                            PageCurlConfig.GestureDragInteraction(
+                                PageCurlConfig.GestureDragInteraction.Config(iterator.nextRect()),
+                                PageCurlConfig.GestureDragInteraction.Config(iterator.nextRect()),
+                            )
+                        }
+
+                        PageCurlConfig.StartEndDragInteraction::class.java -> {
+                            PageCurlConfig.StartEndDragInteraction(
+                                PageCurlConfig.StartEndDragInteraction.Config(iterator.nextRect(), iterator.nextRect()),
+                                PageCurlConfig.StartEndDragInteraction.Config(iterator.nextRect(), iterator.nextRect()),
+                            )
+                        }
+
+                        else -> error("Unable to restore PageCurlConfig")
+                    },
+                    when (iterator.next()) {
+                        PageCurlConfig.TargetTapInteraction::class.java -> {
+                            PageCurlConfig.TargetTapInteraction(
+                                PageCurlConfig.TargetTapInteraction.Config(iterator.nextRect()),
+                                PageCurlConfig.TargetTapInteraction.Config(iterator.nextRect()),
+                            )
+                        }
+
+                        else -> error("Unable to restore PageCurlConfig")
+                    },
                     onCustomTap
                 )
             }
@@ -148,10 +163,8 @@ public fun rememberPageCurlConfig(
             tapForwardEnabled = tapForwardEnabled,
             tapBackwardEnabled = tapBackwardEnabled,
             tapCustomEnabled = tapCustomEnabled,
-            dragForwardInteraction = dragForwardInteraction,
-            dragBackwardInteraction = dragBackwardInteraction,
-            tapForwardInteraction = tapForwardInteraction,
-            tapBackwardInteraction = tapBackwardInteraction,
+            dragInteraction = dragInteraction,
+            tapInteraction = tapInteraction,
             onCustomTap = onCustomTap
         )
     }
@@ -173,10 +186,8 @@ public fun rememberPageCurlConfig(
  * @param tapForwardEnabled True if forward tap interaction is enabled or not.
  * @param tapBackwardEnabled True if backward tap interaction is enabled or not.
  * @param tapCustomEnabled True if custom tap interaction is enabled or not, see [onCustomTap].
- * @param dragForwardInteraction The forward drag interaction setting.
- * @param dragBackwardInteraction The backward drag interaction setting.
- * @param tapForwardInteraction The forward tap interaction setting.
- * @param tapBackwardInteraction The backward tap interaction setting.
+ * @param dragInteraction The drag interaction setting.
+ * @param tapInteraction The tap interaction setting.
  * @param onCustomTap The lambda to invoke to check if tap is handled by custom tap or not. Receives the density
  * scope, the PageCurl size and tap position. Returns true if tap is handled and false otherwise.
  */
@@ -193,10 +204,8 @@ public class PageCurlConfig(
     tapForwardEnabled: Boolean,
     tapBackwardEnabled: Boolean,
     tapCustomEnabled: Boolean,
-    dragForwardInteraction: DragInteraction,
-    dragBackwardInteraction: DragInteraction,
-    tapForwardInteraction: TapInteraction,
-    tapBackwardInteraction: TapInteraction,
+    dragInteraction: DragInteraction,
+    tapInteraction: TapInteraction,
     public val onCustomTap: Density.(IntSize, Offset) -> Boolean,
 ) {
     /**
@@ -257,43 +266,92 @@ public class PageCurlConfig(
     public var tapCustomEnabled: Boolean by mutableStateOf(tapCustomEnabled)
 
     /**
-     * The forward drag interaction setting.
-     */
-    public var dragForwardInteraction: DragInteraction by mutableStateOf(dragForwardInteraction)
-
-    /**
-     * The backward drag interaction setting.
-     */
-    public var dragBackwardInteraction: DragInteraction by mutableStateOf(dragBackwardInteraction)
-
-    /**
-     * The forward tap interaction setting.
-     */
-    public var tapForwardInteraction: TapInteraction by mutableStateOf(tapForwardInteraction)
-
-    /**
-     * The backward tap interaction setting.
-     */
-    public var tapBackwardInteraction: TapInteraction by mutableStateOf(tapBackwardInteraction)
-
-    /**
      * The drag interaction setting.
-     *
-     * @property start Defines a rectangle where interaction should start. The rectangle coordinates are relative
-     * (from 0 to 1) and then scaled to the PageCurl bounds.
-     * @property end Defines a rectangle where interaction should end. The rectangle coordinates are relative
-     * (from 0 to 1) and then scaled to the PageCurl bounds.
      */
-    public data class DragInteraction(val start: Rect, val end: Rect)
+    public var dragInteraction: DragInteraction by mutableStateOf(dragInteraction)
 
     /**
      * The tap interaction setting.
-     *
-     * @property target Defines a rectangle where interaction captured. The rectangle coordinates are relative
-     * (from 0 to 1) and then scaled to the PageCurl bounds.
      */
-    public data class TapInteraction(val target: Rect)
+    public var tapInteraction: TapInteraction by mutableStateOf(tapInteraction)
+
+    /**
+     * The drag interaction setting.
+     */
+    public sealed interface DragInteraction
+
+    /**
+     * The drag interaction setting based on where user start and end drag gesture inside the PageCurl.
+     *
+     * @property forward The forward tap configuration.
+     * @property backward The backward tap configuration.
+     */
+    public data class StartEndDragInteraction(
+        val forward: Config = Config(start = rightHalf(), end = leftHalf()),
+        val backward: Config = Config(start = leftHalf(), end = rightHalf())
+    ) : DragInteraction {
+
+        /**
+         * The drag interaction configuration for forward or backward drag.
+         *
+         * @property start Defines a rectangle where interaction should start. The rectangle coordinates are relative
+         * (from 0 to 1) and then scaled to the PageCurl bounds.
+         * @property end Defines a rectangle where interaction should end. The rectangle coordinates are relative
+         * (from 0 to 1) and then scaled to the PageCurl bounds.
+         */
+        public data class Config(val start: Rect, val end: Rect)
+    }
+
+    /**
+     * The drag interaction setting based on the direction where drag has been started.
+     *
+     * @property forward The forward tap configuration.
+     * @property backward The backward tap configuration.
+     */
+    public data class GestureDragInteraction(
+        val forward: Config = Config(target = full()),
+        val backward: Config = Config(target = full()),
+    ) : DragInteraction {
+
+        /**
+         * The drag interaction configuration for forward or backward drag.
+         *
+         * @property target Defines a rectangle where interaction captured. The rectangle coordinates are relative
+         * (from 0 to 1) and then scaled to the PageCurl bounds.
+         */
+        public data class Config(val target: Rect)
+    }
+
+    /**
+     * The tap interaction setting.
+     */
+    public sealed interface TapInteraction
+
+    /**
+     * The tap interaction setting based on where user taps inside the PageCurl.
+     *
+     * @property forward The forward tap configuration.
+     * @property backward The backward tap configuration.
+     */
+    public data class TargetTapInteraction(
+        val forward: Config = Config(target = rightHalf()),
+        val backward: Config = Config(target = leftHalf())
+    ) : TapInteraction {
+
+        /**
+         * The tap interaction configuration for forward or backward tap.
+         *
+         * @property target Defines a rectangle where interaction captured. The rectangle coordinates are relative
+         * (from 0 to 1) and then scaled to the PageCurl bounds.
+         */
+        public data class Config(val target: Rect)
+    }
 }
+
+/**
+ * The full size of the PageCurl.
+ */
+private fun full(): Rect = Rect(0.0f, 0.0f, 1.0f, 1.0f)
 
 /**
  * The left half of the PageCurl.
