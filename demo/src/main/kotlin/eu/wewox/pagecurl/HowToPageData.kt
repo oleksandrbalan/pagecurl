@@ -78,15 +78,19 @@ data class HowToPageData(
             ),
             HowToPageData(
                 "Custom tap",
-                "This example has a custom tap configured to show a settings row below. Try it and tap somewhere near the center of the page. Tap on the PageCurl to zoom back in.",
+                "This example has a custom tap configured to show a settings above and below. Try it and tap somewhere near the center of the page. Tap on the PageCurl to zoom back in.",
             ),
             HowToPageData(
-                "Settings",
-                "Try to change the slider value and see how it changes the gesture zones. For example if you set 0.25f on the tap gesture this means, that the first 25% of the width will be dedicated for backward tap, and other 75% will be used for forward tap.",
+                "Taps",
+                "Try to change the slider value for 'Tap' option and see how it affects tap zones. For example if you set 0.25f on the tap gesture this means, that the first 25% of the width will be dedicated for backward tap, and other 75% will be used for forward tap.",
             ),
             HowToPageData(
-                "End region in drag",
-                "Keep in mind, that drag gestures have 'end' region (where gesture should be ended to complete a drag), so if you set 0f for drag gesture, the only forward gesture will be allowed, but it could not be completed. You can modify the 'end' region as needed for your use-case.",
+                "Drag region",
+                "The original 'drag region' interaction relies on 'start' and 'end' regions. The 'start' region defines where the drag must begin and 'end' where it should end. For example if you set 0.25f on the drag region gesture this means the the forward drag interaction must start in the last 75% of width and end in the first 25% of the width.",
+            ),
+            HowToPageData(
+                "Drag gesture",
+                "The 'drag gesture' is a newer drag interaction which performs forward or backward drag based on the direction where drag gesture starts. This for example allows to swipe backwards in the right part of the page if page was dragged from left to right. You can play with settings where drag is detected along the X axis.",
             ),
             HowToPageData(
                 "End",

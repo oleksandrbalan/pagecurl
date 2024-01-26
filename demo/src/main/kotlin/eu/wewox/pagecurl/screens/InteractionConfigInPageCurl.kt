@@ -2,6 +2,7 @@
 
 package eu.wewox.pagecurl.screens
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +12,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,7 +43,6 @@ import eu.wewox.pagecurl.config.PageCurlConfig
 import eu.wewox.pagecurl.config.rememberPageCurlConfig
 import eu.wewox.pagecurl.page.PageCurl
 import eu.wewox.pagecurl.page.rememberPageCurlState
-import eu.wewox.pagecurl.ui.SpacingLarge
 import eu.wewox.pagecurl.ui.SpacingMedium
 import eu.wewox.pagecurl.ui.SpacingSmall
 
@@ -64,10 +72,39 @@ fun InteractionConfigInPageCurlScreen() {
             }
         )
 
+        var selectedOption by remember { mutableStateOf(InteractionOption.entries.first()) }
+        val interactionSettings = remember { InteractionSettings() }
+
+        LaunchedEffect(
+            selectedOption,
+            interactionSettings.tap,
+            interactionSettings.dragStartEnd,
+            interactionSettings.dragGesture,
+        ) {
+            config.dragInteraction = when (selectedOption) {
+                InteractionOption.DragRegion -> interactionSettings.dragStartEnd
+                InteractionOption.DragGesture -> interactionSettings.dragGesture
+                InteractionOption.Tap -> config.dragInteraction
+            }
+
+            config.tapInteraction = interactionSettings.tap
+        }
+
         ZoomOutLayout(
             zoomOut = zoomOut,
             config = config,
-            bottom = { SettingsRow(config) },
+            top = {
+                SettingsOptionsRow(
+                    selectedOption = selectedOption,
+                    onSelectedOptionChange = { selectedOption = it }
+                )
+            },
+            bottom = {
+                SettingsRowSlider(
+                    interactionSettings = interactionSettings,
+                    selectedOption = selectedOption,
+                )
+            },
         ) {
             PageCurl(
                 count = pages.size,
@@ -81,89 +118,172 @@ fun InteractionConfigInPageCurlScreen() {
 }
 
 @Composable
-private fun SettingsRow(
-    config: PageCurlConfig,
+private fun SettingsOptionsRow(
+    selectedOption: InteractionOption,
+    onSelectedOptionChange: (InteractionOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedOption by remember { mutableStateOf(InteractionOption.Drag) }
     Column(
         verticalArrangement = Arrangement.spacedBy(SpacingSmall),
         modifier = modifier
             .fillMaxWidth()
-            .padding(SpacingLarge)
+            .padding(SpacingMedium)
+            .selectableGroup()
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxWidth()
-                .selectableGroup()
-        ) {
-            InteractionOption.values().forEach { option ->
-                Row(
-                    Modifier
-                        .selectable(
-                            selected = selectedOption == option,
-                            onClick = { selectedOption = option },
-                            role = Role.RadioButton
-                        ),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
+        Text(
+            text = "Interaction setting",
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        InteractionOption.entries.forEach { option ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .selectable(
                         selected = selectedOption == option,
-                        onClick = null
-                    )
-                    Text(
-                        text = option.name,
-                        modifier = Modifier.padding(start = SpacingMedium)
-                    )
-                }
+                        onClick = { onSelectedOptionChange(option) },
+                        role = Role.RadioButton
+                    ),
+            ) {
+                RadioButton(
+                    selected = selectedOption == option,
+                    onClick = null
+                )
+                Text(
+                    text = option.name,
+                    modifier = Modifier.padding(start = SpacingMedium)
+                )
             }
         }
-
-        SettingsRowSlider(
-            selectedOption = selectedOption,
-            config = config,
-        )
     }
 }
 
 @Composable
 private fun SettingsRowSlider(
     selectedOption: InteractionOption,
-    config: PageCurlConfig,
+    interactionSettings: InteractionSettings,
+    modifier: Modifier = Modifier,
 ) {
-    when (selectedOption) {
-        InteractionOption.Drag -> {
+    AnimatedContent(
+        targetState = selectedOption,
+        label = "Sliders animation",
+        modifier = modifier,
+    ) { option ->
+        when (option) {
+            InteractionOption.Tap -> {
+                DoubleSliders(
+                    value = interactionSettings.tap.forward.target.left,
+                    onValueChange = { interactionSettings.tap = createTapTargetInteraction(it) }
+                )
+            }
+
+            InteractionOption.DragRegion -> {
+                DoubleSliders(
+                    value = interactionSettings.dragStartEnd.forward.start.left,
+                    onValueChange = { interactionSettings.dragStartEnd = createDragStartEndInteraction(it) }
+                )
+            }
+
+            InteractionOption.DragGesture -> {
+                val from = interactionSettings.dragGesture.forward.target.left
+                val to = interactionSettings.dragGesture.forward.target.right
+                RangeSlider(
+                    value = from..to,
+                    onValueChange = { range ->
+                        interactionSettings.dragGesture = createDragGestureInteraction(range.start, range.endInclusive)
+                    },
+                    modifier = Modifier.padding(horizontal = SpacingMedium)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DoubleSliders(
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(horizontal = SpacingMedium),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.ArrowForward,
+                contentDescription = null,
+            )
+
             Slider(
-                value = config.dragForwardInteraction.start.left,
-                onValueChange = {
-                    config.dragForwardInteraction = PageCurlConfig.DragInteraction(
-                        Rect(it, 0.0f, 1.0f, 1.0f),
-                        Rect(0.0f, 0.0f, it, 1.0f)
-                    )
-                    config.dragBackwardInteraction = PageCurlConfig.DragInteraction(
-                        Rect(0.0f, 0.0f, it, 1.0f),
-                        Rect(it, 0.0f, 1.0f, 1.0f),
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
+                value = value,
+                onValueChange = onValueChange,
+                colors = SliderDefaults.colors(
+                    activeTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    inactiveTrackColor = MaterialTheme.colorScheme.primary,
+                ),
+                modifier = Modifier.weight(1f)
             )
         }
-        InteractionOption.Tap -> {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.ArrowBack,
+                contentDescription = null,
+            )
+
             Slider(
-                value = config.tapForwardInteraction.target.left,
-                onValueChange = {
-                    config.tapForwardInteraction = PageCurlConfig.TapInteraction(
-                        Rect(it, 0.0f, 1.0f, 1.0f),
-                    )
-                    config.tapBackwardInteraction = PageCurlConfig.TapInteraction(
-                        Rect(0.0f, 0.0f, it, 1.0f),
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier.weight(1f)
             )
         }
     }
 }
 
-private enum class InteractionOption { Drag, Tap }
+private class InteractionSettings {
+
+    var tap by mutableStateOf(createTapTargetInteraction(0.5f))
+
+    var dragStartEnd by mutableStateOf(createDragStartEndInteraction(0.5f))
+
+    var dragGesture by mutableStateOf(createDragGestureInteraction(0f, 1f))
+}
+
+private fun createTapTargetInteraction(value: Float): PageCurlConfig.TargetTapInteraction =
+    PageCurlConfig.TargetTapInteraction(
+        forward = PageCurlConfig.TargetTapInteraction.Config(
+            Rect(value, 0.0f, 1.0f, 1.0f),
+        ),
+        backward = PageCurlConfig.TargetTapInteraction.Config(
+            Rect(0.0f, 0.0f, value, 1.0f),
+        )
+    )
+
+private fun createDragStartEndInteraction(value: Float): PageCurlConfig.StartEndDragInteraction =
+    PageCurlConfig.StartEndDragInteraction(
+        forward = PageCurlConfig.StartEndDragInteraction.Config(
+            Rect(value, 0.0f, 1.0f, 1.0f),
+            Rect(0.0f, 0.0f, value, 1.0f),
+        ),
+        backward = PageCurlConfig.StartEndDragInteraction.Config(
+            Rect(0.0f, 0.0f, value, 1.0f),
+            Rect(value, 0.0f, 1.0f, 1.0f),
+        )
+    )
+
+private fun createDragGestureInteraction(from: Float, to: Float): PageCurlConfig.GestureDragInteraction =
+    PageCurlConfig.GestureDragInteraction(
+        forward = PageCurlConfig.GestureDragInteraction.Config(
+            Rect(from, 0.0f, to, 1.0f),
+        ),
+        backward = PageCurlConfig.GestureDragInteraction.Config(
+            Rect(from, 0.0f, to, 1.0f),
+        )
+    )
+
+private enum class InteractionOption { Tap, DragRegion, DragGesture }

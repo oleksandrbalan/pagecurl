@@ -1,7 +1,7 @@
 package eu.wewox.pagecurl.page
 
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -18,36 +18,32 @@ internal fun Modifier.tapGesture(
     onTapForward: suspend () -> Unit,
     onTapBackward: suspend () -> Unit,
 ): Modifier = pointerInput(config) {
-    forEachGesture {
-        awaitPointerEventScope {
-            val down = awaitFirstDown().also { it.consume() }
-            val up = waitForUpOrCancellation() ?: return@awaitPointerEventScope
+    val tapInteraction = config.tapInteraction as? PageCurlConfig.TargetTapInteraction ?: return@pointerInput
 
-            if ((down.position - up.position).getDistance() > viewConfiguration.touchSlop) {
-                return@awaitPointerEventScope
-            }
+    awaitEachGesture {
+        val down = awaitFirstDown().also { it.consume() }
+        val up = waitForUpOrCancellation() ?: return@awaitEachGesture
 
-            if (config.tapCustomEnabled && config.onCustomTap(this, size, up.position)) {
-                return@awaitPointerEventScope
-            }
+        if ((down.position - up.position).getDistance() > viewConfiguration.touchSlop) {
+            return@awaitEachGesture
+        }
 
-            if (config.tapForwardEnabled && config.tapForwardInteraction.target.multiply(size).contains(up.position)) {
-                scope.launch {
-                    onTapForward()
-                }
-                return@awaitPointerEventScope
-            }
+        if (config.tapCustomEnabled && config.onCustomTap(this, size, up.position)) {
+            return@awaitEachGesture
+        }
 
-            if (config.tapBackwardEnabled &&
-                config.tapBackwardInteraction.target
-                    .multiply(size)
-                    .contains(up.position)
-            ) {
-                scope.launch {
-                    onTapBackward()
-                }
-                return@awaitPointerEventScope
+        if (config.tapForwardEnabled && tapInteraction.forward.target.multiply(size).contains(up.position)) {
+            scope.launch {
+                onTapForward()
             }
+            return@awaitEachGesture
+        }
+
+        if (config.tapBackwardEnabled && tapInteraction.backward.target.multiply(size).contains(up.position)) {
+            scope.launch {
+                onTapBackward()
+            }
+            return@awaitEachGesture
         }
     }
 }
