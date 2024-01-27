@@ -16,7 +16,7 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
-import eu.wewox.pagecurl.ExperimentalPageCurlApi
+import androidx.compose.ui.unit.IntSize
 import eu.wewox.pagecurl.utils.rotate
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -32,9 +32,9 @@ internal data class DragConfig(
     val onChange: () -> Unit,
 )
 
-@ExperimentalPageCurlApi
 internal suspend fun PointerInputScope.detectCurlGestures(
     scope: CoroutineScope,
+    newEdgeCreator: NewEdgeCreator,
     getConfig: (Offset, Offset) -> DragConfig?,
 ) {
     // Use velocity tracker to support flings
@@ -91,9 +91,8 @@ internal suspend fun PointerInputScope.detectCurlGestures(
                 velocityTracker.addPosition(System.currentTimeMillis(), change.position)
 
                 scope.launch {
-                    val vector = Offset(size.width.toFloat(), startOffset.y) - change.position
-                    val rotatedVector = vector.rotate(PI.toFloat() / 2)
-                    edge.animateTo(Edge(change.position - rotatedVector, change.position + rotatedVector))
+                    val target = newEdgeCreator.createNew(size, startOffset, change.position)
+                    edge.animateTo(target)
                 }
             }
         }
@@ -126,6 +125,31 @@ internal suspend fun PointerInputScope.detectCustomDragGestures(
                 it.consume()
             }
             onDragEnd(drag?.position ?: down.position, completed)
+        }
+    }
+}
+
+internal abstract class NewEdgeCreator {
+
+    abstract fun createNew(size: IntSize, startOffset: Offset, currentOffset: Offset): Edge
+
+    protected fun createVectors(size: IntSize, startOffset: Offset, currentOffset: Offset): Pair<Offset, Offset> {
+        val vector = Offset(size.width.toFloat(), startOffset.y) - currentOffset
+        val rotatedVector = vector.rotate(PI.toFloat() / 2)
+        return vector to rotatedVector
+    }
+
+    class Default : NewEdgeCreator() {
+        override fun createNew(size: IntSize, startOffset: Offset, currentOffset: Offset): Edge {
+            val vectors = createVectors(size, startOffset, currentOffset)
+            return Edge(currentOffset - vectors.second, currentOffset + vectors.second)
+        }
+    }
+
+    class PageEdge : NewEdgeCreator() {
+        override fun createNew(size: IntSize, startOffset: Offset, currentOffset: Offset): Edge {
+            val (vector, rotatedVector) = createVectors(size, startOffset, currentOffset)
+            return Edge(currentOffset - rotatedVector + vector / 2f, currentOffset + rotatedVector + vector / 2f)
         }
     }
 }

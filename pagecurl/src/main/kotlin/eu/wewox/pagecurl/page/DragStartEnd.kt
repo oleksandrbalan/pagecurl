@@ -6,6 +6,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.input.pointer.pointerInput
 import eu.wewox.pagecurl.ExperimentalPageCurlApi
 import eu.wewox.pagecurl.config.PageCurlConfig
+import eu.wewox.pagecurl.config.PageCurlConfig.DragInteraction.PointerBehavior
 import eu.wewox.pagecurl.utils.multiply
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -47,6 +48,10 @@ internal fun Modifier.dragStartEnd(
 
         detectCurlGestures(
             scope = scope,
+            newEdgeCreator = when (dragInteraction.pointerBehavior) {
+                PointerBehavior.Default -> NewEdgeCreator.Default()
+                PointerBehavior.PageEdge -> NewEdgeCreator.PageEdge()
+            },
             getConfig = { start, _ ->
                 val config = if (forwardStartRect.contains(start)) {
                     forwardConfig
