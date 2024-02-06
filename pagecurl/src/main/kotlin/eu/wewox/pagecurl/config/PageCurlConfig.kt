@@ -80,7 +80,7 @@ public fun rememberPageCurlConfig(
                     }
 
                 fun PageCurlConfig.DragInteraction.forSave(): List<Any> =
-                    listOf(this::class.java) + getRectList().flatMap(Rect::forSave)
+                    listOf(this::class.java, pointerBehavior.name) + getRectList().flatMap(Rect::forSave)
 
                 fun PageCurlConfig.TapInteraction.forSave(): List<Any> =
                     listOf(this::class.java) + getRectList().flatMap(Rect::forSave)
@@ -122,6 +122,7 @@ public fun rememberPageCurlConfig(
                     when (iterator.next()) {
                         PageCurlConfig.GestureDragInteraction::class.java -> {
                             PageCurlConfig.GestureDragInteraction(
+                                PageCurlConfig.DragInteraction.PointerBehavior.valueOf(iterator.next() as String),
                                 PageCurlConfig.GestureDragInteraction.Config(iterator.nextRect()),
                                 PageCurlConfig.GestureDragInteraction.Config(iterator.nextRect()),
                             )
@@ -129,6 +130,7 @@ public fun rememberPageCurlConfig(
 
                         PageCurlConfig.StartEndDragInteraction::class.java -> {
                             PageCurlConfig.StartEndDragInteraction(
+                                PageCurlConfig.DragInteraction.PointerBehavior.valueOf(iterator.next() as String),
                                 PageCurlConfig.StartEndDragInteraction.Config(iterator.nextRect(), iterator.nextRect()),
                                 PageCurlConfig.StartEndDragInteraction.Config(iterator.nextRect(), iterator.nextRect()),
                             )
@@ -278,15 +280,42 @@ public class PageCurlConfig(
     /**
      * The drag interaction setting.
      */
-    public sealed interface DragInteraction
+    public sealed interface DragInteraction {
+
+        /**
+         * The pointer behavior during drag interaction.
+         */
+        public val pointerBehavior: PointerBehavior
+
+        /**
+         * The enumeration of available pointer behaviors.
+         */
+        public enum class PointerBehavior {
+            /**
+             * The default behavior is an original one, where "page flip" is anchored to the user's finger.
+             * The "page flip" in this sense is a line which divides the back page of the current page and the front
+             * page of the next page. This means that when finger is dragged to the left edge, the next page is fully
+             * visible.
+             */
+            Default,
+
+            /**
+             * In the page-edge behavior the right edge of the current page is anchored to the user's finger.
+             * This means that when finger is dragged to the left edge, the next page is half visible.
+             */
+            PageEdge;
+        }
+    }
 
     /**
      * The drag interaction setting based on where user start and end drag gesture inside the PageCurl.
      *
+     * @property pointerBehavior The pointer behavior during drag interaction.
      * @property forward The forward tap configuration.
      * @property backward The backward tap configuration.
      */
     public data class StartEndDragInteraction(
+        override val pointerBehavior: DragInteraction.PointerBehavior = DragInteraction.PointerBehavior.Default,
         val forward: Config = Config(start = rightHalf(), end = leftHalf()),
         val backward: Config = Config(start = leftHalf(), end = rightHalf())
     ) : DragInteraction {
@@ -305,10 +334,12 @@ public class PageCurlConfig(
     /**
      * The drag interaction setting based on the direction where drag has been started.
      *
+     * @property pointerBehavior The pointer behavior during drag interaction.
      * @property forward The forward tap configuration.
      * @property backward The backward tap configuration.
      */
     public data class GestureDragInteraction(
+        override val pointerBehavior: DragInteraction.PointerBehavior = DragInteraction.PointerBehavior.Default,
         val forward: Config = Config(target = full()),
         val backward: Config = Config(target = full()),
     ) : DragInteraction {

@@ -93,6 +93,10 @@ data class HowToPageData(
                 "The 'drag gesture' is a newer drag interaction which performs forward or backward drag based on the direction where drag gesture starts. This for example allows to swipe backwards in the right part of the page if page was dragged from left to right. You can play with settings where drag is detected along the X axis.",
             ),
             HowToPageData(
+                "Pointer behavior",
+                "There is another switch, which switches between 'Default' and 'PageEdge' pointer behavior for the selected drag interaction. Try to check / uncheck it and observe which part of the current page is anchored to the finger when you flip a page.",
+            ),
+            HowToPageData(
                 "End",
                 "That is the last page, you cannot go further \uD83D\uDE09",
             )

@@ -21,6 +21,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +41,7 @@ import eu.wewox.pagecurl.HowToPageData
 import eu.wewox.pagecurl.components.HowToPage
 import eu.wewox.pagecurl.components.ZoomOutLayout
 import eu.wewox.pagecurl.config.PageCurlConfig
+import eu.wewox.pagecurl.config.PageCurlConfig.DragInteraction.PointerBehavior
 import eu.wewox.pagecurl.config.rememberPageCurlConfig
 import eu.wewox.pagecurl.page.PageCurl
 import eu.wewox.pagecurl.page.rememberPageCurlState
@@ -178,24 +180,77 @@ private fun SettingsRowSlider(
             }
 
             InteractionOption.DragRegion -> {
-                DoubleSliders(
-                    value = interactionSettings.dragStartEnd.forward.start.left,
-                    onValueChange = { interactionSettings.dragStartEnd = createDragStartEndInteraction(it) }
-                )
+                Column {
+                    PointerBehaviorSwitch(
+                        pointerBehavior = interactionSettings.dragStartEnd.pointerBehavior,
+                        onChange = {
+                            interactionSettings.dragStartEnd =
+                                interactionSettings.dragStartEnd.copy(pointerBehavior = it)
+                        }
+                    )
+
+                    DoubleSliders(
+                        value = interactionSettings.dragStartEnd.forward.start.left,
+                        onValueChange = {
+                            interactionSettings.dragStartEnd =
+                                interactionSettings.dragStartEnd.copy(value = it)
+                        }
+                    )
+                }
             }
 
             InteractionOption.DragGesture -> {
-                val from = interactionSettings.dragGesture.forward.target.left
-                val to = interactionSettings.dragGesture.forward.target.right
-                RangeSlider(
-                    value = from..to,
-                    onValueChange = { range ->
-                        interactionSettings.dragGesture = createDragGestureInteraction(range.start, range.endInclusive)
-                    },
-                    modifier = Modifier.padding(horizontal = SpacingMedium)
-                )
+                Column {
+                    PointerBehaviorSwitch(
+                        pointerBehavior = interactionSettings.dragGesture.pointerBehavior,
+                        onChange = {
+                            interactionSettings.dragGesture =
+                                interactionSettings.dragGesture.copy(pointerBehavior = it)
+                        }
+                    )
+
+                    val from = interactionSettings.dragGesture.forward.target.left
+                    val to = interactionSettings.dragGesture.forward.target.right
+                    RangeSlider(
+                        value = from..to,
+                        onValueChange = { range ->
+                            interactionSettings.dragGesture =
+                                interactionSettings.dragGesture.copy(
+                                    from = range.start,
+                                    to = range.endInclusive,
+                                )
+                        },
+                        modifier = Modifier.padding(horizontal = SpacingMedium)
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun PointerBehaviorSwitch(
+    pointerBehavior: PointerBehavior,
+    onChange: (PointerBehavior) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(SpacingMedium),
+        modifier = modifier.padding(horizontal = SpacingMedium),
+    ) {
+        Switch(
+            checked = pointerBehavior == PointerBehavior.PageEdge,
+            onCheckedChange = { checked ->
+                onChange(
+                    when (checked) {
+                        true -> PointerBehavior.PageEdge
+                        false -> PointerBehavior.Default
+                    }
+                )
+            }
+        )
+        Text(text = "Pointer on edge")
     }
 }
 
@@ -249,9 +304,9 @@ private class InteractionSettings {
 
     var tap by mutableStateOf(createTapTargetInteraction(0.5f))
 
-    var dragStartEnd by mutableStateOf(createDragStartEndInteraction(0.5f))
+    var dragStartEnd by mutableStateOf(PageCurlConfig.StartEndDragInteraction())
 
-    var dragGesture by mutableStateOf(createDragGestureInteraction(0f, 1f))
+    var dragGesture by mutableStateOf(PageCurlConfig.GestureDragInteraction())
 }
 
 private fun createTapTargetInteraction(value: Float): PageCurlConfig.TargetTapInteraction =
@@ -264,8 +319,12 @@ private fun createTapTargetInteraction(value: Float): PageCurlConfig.TargetTapIn
         )
     )
 
-private fun createDragStartEndInteraction(value: Float): PageCurlConfig.StartEndDragInteraction =
+private fun PageCurlConfig.StartEndDragInteraction.copy(
+    pointerBehavior: PointerBehavior = this.pointerBehavior,
+    value: Float = forward.start.left,
+): PageCurlConfig.StartEndDragInteraction =
     PageCurlConfig.StartEndDragInteraction(
+        pointerBehavior = pointerBehavior,
         forward = PageCurlConfig.StartEndDragInteraction.Config(
             Rect(value, 0.0f, 1.0f, 1.0f),
             Rect(0.0f, 0.0f, value, 1.0f),
@@ -276,8 +335,13 @@ private fun createDragStartEndInteraction(value: Float): PageCurlConfig.StartEnd
         )
     )
 
-private fun createDragGestureInteraction(from: Float, to: Float): PageCurlConfig.GestureDragInteraction =
+private fun PageCurlConfig.GestureDragInteraction.copy(
+    pointerBehavior: PointerBehavior = this.pointerBehavior,
+    from: Float = forward.target.left,
+    to: Float = forward.target.right,
+): PageCurlConfig.GestureDragInteraction =
     PageCurlConfig.GestureDragInteraction(
+        pointerBehavior = pointerBehavior,
         forward = PageCurlConfig.GestureDragInteraction.Config(
             Rect(from, 0.0f, to, 1.0f),
         ),
