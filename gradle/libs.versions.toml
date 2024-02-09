@@ -1,15 +1,15 @@
 [versions]
 sdk-compile = "34"
 sdk-min = "21"
-sdk-target = "33"
+sdk-target = "34"
 
-compose-bom = "2023.09.00"
-compose-compiler = "1.5.3"
-activity-compose = "1.8.0-beta01"
+compose-bom = "2024.02.00"
+compose-compiler = "1.5.8"
+activity-compose = "1.8.2"
 paging = "3.2.1"
 
-plugin-android-gradle = "8.1.1"
-plugin-kotlin = "1.9.10"
+plugin-android-gradle = "8.2.2"
+plugin-kotlin = "1.9.22"
 plugin-detekt = "1.21.0"
 plugin-spotless = "6.5.1"
 plugin-mavenpublish = "0.25.3"
